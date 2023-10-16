@@ -1,27 +1,24 @@
 #include <Preferences.h>
 #include <WiFi.h>
 
-#define WIFI_KEY_MAXLEN (int)64
-#define WIFI_SSID_MAXLEN (int)32
+#define GPS_MODE_CSV 0
+#define GPS_MODE_PROXY 1
 
 struct StoredSettingsStruct
 {
     WiFiMode_t wifiMode = WIFI_AP;
-    char wifiStaSsid[WIFI_SSID_MAXLEN];
-    char wifiStaKey[WIFI_KEY_MAXLEN];
+    String wifiStaSsid;
+    String wifiStaPass;
+    int gpsMode;
 };
 
 class Settings 
 {
     private:        
-        Preferences preferences;
-        StoredSettingsStruct storedSettings;
+        Preferences preferences;                
         
-        void readFromMemory();
-
     public:
-        Settings();
-        
-        void saveSettings();
-        StoredSettingsStruct get();
+        void save();        
+        void load();
+        StoredSettingsStruct storage;
 };

@@ -1,14 +1,27 @@
 #include <SD.h>
 #include <WebServer.h>
+#include "HTTP/Template.h"
 
-const char* URI = "/sd/browse";
+const char* URI = "/sdcard";
+
+const char FILE_BROWSER_TABLE_HEADER_TEMPLATE[] PROGMEM = R"raw(
+        <thead>
+            <tr>
+                <th></th>
+                <th>Filename</th>
+                <th>Size</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+    )raw";
+
 
 class FileBrowserHandler : public RequestHandler
 {
     public:
         bool canHandle(HTTPMethod requestMethod, String requestUri)
         {
-            return requestMethod == HTTP_GET && requestUri.startsWith(URI);
+            return requestUri.startsWith(URI);
         }
 
         bool handle(WebServer& server, HTTPMethod requestMethod, String requestUri)
@@ -26,9 +39,9 @@ class FileBrowserHandler : public RequestHandler
 
             File entry = SD.open(requestUri);
             if (entry.isDirectory()) {
-                server.send(200, "text/html", directoryHtmlTable(entry));
+                server.send(200, contentTypeHtml, Template::generateBody(directoryHtmlTable(entry)));
             } else {
-                size_t sent = server.streamFile(entry, "application/octet-stream");                
+                size_t sent = server.streamFile(entry, contentTypeStream);                
             }
 
             entry.close();
@@ -40,7 +53,18 @@ class FileBrowserHandler : public RequestHandler
         String directoryHtmlTable(File dir)
         {
             String baseUri = String(URI) + dir.path() + "/";
-            String table = "<table>";
+            String table = R"raw(
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Filename</th>
+                            <th>Size</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            )raw";
 
             table += "<tr><td colspan='100'><a href='" + baseUri +"'>../</a></td></tr>";
 
@@ -53,6 +77,7 @@ class FileBrowserHandler : public RequestHandler
                 String entryUri = baseUri + entry.name();
 
                 table += "<tr>";
+                table += "<td></td>";
                 table += "<td><a href='" + entryUri + "'>";
                 table += entry.name();
                 table += "</a></td>";
@@ -69,7 +94,7 @@ class FileBrowserHandler : public RequestHandler
 
                 entry.close();                        
             }
-            table += "</table>";
+            table += "</tbody></table>";
 
             return table;
         }

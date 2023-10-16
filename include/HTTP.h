@@ -2,13 +2,11 @@
 #include <WebServer.h>
 #include <uri/UriBraces.h>
 
-
-
 class HTTP
 {
     private:
         int port;
-        WebServer web;
+        WebServer server;
     
     public:
         HTTP(int port);
@@ -17,11 +15,7 @@ class HTTP
         void start();
         void stop();
         void handleClient();
-
-        // Helpers
-        String generateHeader(bool addMenu);
-        String generateBody(String body, bool addMenu);
-        
+      
         // Handles
         void notFound();
 };

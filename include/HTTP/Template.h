@@ -1,22 +1,32 @@
 #include "EnduroGPS.h"
 
+#ifndef TEMPLATE_H
+#define TEMPLATE_H
+
 #define WEBPORTAL_HEADER_STATIC_SIZE 350
 #define WEBPORTAL_HEADER_DYN_SIZE 150
 #define WEBPORTAL_FOOTER_STATIC_SIZE 210
 
-#ifndef WEBPORTAL_HEADER
-const char WEBPORTAL_HEADER[] PROGMEM = ""
-    "<!DOCTYPE html>\n"
-    "<html lang='en'>\n"
-    "\t<head>\n"
-    "\t\t<title>EnduroGPS</title>\n"
-    "\t\t<meta charset='utf-8'>\n"
-    "\t\t<meta name='viewport' content='width=device-width, initial-scale=1'>\n"
-    "\t\t<link rel='stylesheet' href='/style.css'>\n"
-    "\t</head>\n"
-    "<body>\n"
-    ;
-#endif
+const char WEBPORTAL_HEADER[] PROGMEM = R"raw(
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <title>EnduroGPS</title>
+        <meta charset="utf-8">
+        <meta name="viewport' content='width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/style.css">
+        </head>
+    <body>
+        <nav class="nav" onclick="this.focus()">
+            <div class="container">
+                <a class="pagename current" href="#">EnduroGPS</a>
+                <a href="/">Status</a>
+                <a href="/sdcard">Files</a>
+                <a href="/settings">Settings</a>                
+            </div>
+        </nav>
+        <button class="btn-close btn btn-sm">X</button>
+    )raw";
 
 const char WEBPORTAL_FOOTER[] PROGMEM = ""
     "<footer>"
@@ -27,8 +37,25 @@ const char WEBPORTAL_FOOTER[] PROGMEM = ""
     "</html>"
     ;
 
-const char html_text[] PROGMEM = "text/html";
-const char html_css[] PROGMEM = "text/css";
-const char text_json[] PROGMEM = "application/json";
-const char json_ok[] PROGMEM = "{'status':'ok'}";
-const char json_error[] PROGMEM = "{'status':'error'}";
+const char contentTypeHtml[] PROGMEM = "text/html";
+const char contentTypeCss[] PROGMEM = "text/css";
+const char contentTypeStream[] PROGMEM = "application/octet-stream";
+
+class Template
+{
+    public:
+        static String generateBody(String content) 
+        {
+            String htmlBody((char *) 0);
+
+            htmlBody.reserve(WEBPORTAL_HEADER_STATIC_SIZE + WEBPORTAL_HEADER_DYN_SIZE + WEBPORTAL_FOOTER_STATIC_SIZE + content.length());
+            htmlBody += String(WEBPORTAL_HEADER);
+            //htmlBody += HTTP::generateHeader(addMenu);
+            htmlBody += content;
+            htmlBody += String(WEBPORTAL_FOOTER);
+
+            return htmlBody;
+        }
+};
+
+#endif

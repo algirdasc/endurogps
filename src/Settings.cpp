@@ -1,21 +1,11 @@
 #include "EnduroGPS.h"
 #include "Settings.h"
 
-Settings::Settings() 
+void Settings::save()
 {
-    preferences.begin(ENDUROGPS_AP_MDNS);
-    Settings::readFromMemory();
-}
-
-StoredSettingsStruct Settings::get() 
-{
-    return storedSettings;
-}
-
-void Settings::saveSettings()
-{
+    size_t sizeWritten;
     String stringWifiMode;
-    switch (storedSettings.wifiMode) {
+    switch (storage.wifiMode) {
         case WIFI_AP:
             stringWifiMode = "WIFI_AP";
             break;
@@ -30,20 +20,30 @@ void Settings::saveSettings()
             break;
     }
 
-    preferences.putString("wifiMode", stringWifiMode);
+    sizeWritten = preferences.putString("wifiMode", stringWifiMode);
+    sizeWritten = preferences.putString("wifiStaSsid", storage.wifiStaSsid);
+    sizeWritten = preferences.putString("wifiStaPass", storage.wifiStaPass);
 }
 
-void Settings::readFromMemory()
+void Settings::load()
 {
+    preferences.begin("endurogps");
+
     String wifiMode = preferences.getString("wifiMode");
     if (wifiMode == "WIFI_STA") {
-        storedSettings.wifiMode = WIFI_STA;
+        storage.wifiMode = WIFI_STA;
     } else if (wifiMode == "WIFI_AP") {
-        storedSettings.wifiMode = WIFI_AP;        
+        storage.wifiMode = WIFI_AP;        
     } else if (wifiMode == "WIFI_OFF") {
-        storedSettings.wifiMode = WIFI_OFF;
+        storage.wifiMode = WIFI_OFF;
     } else {
         log_e("Error reading WiFi preference, defaulting to WIFI_AP");
-        storedSettings.wifiMode = WIFI_AP;
-    }
+        storage.wifiMode = WIFI_AP;
+    }    
+
+    storage.wifiStaPass = preferences.getString("wifiStaPass");
+    storage.wifiStaSsid = preferences.getString("wifiStaSsid");
+
+    log_d("wifiStaSsid: %s", storage.wifiStaSsid);
+    log_d("wifiStaSsid: %s", preferences.getString("wifiStaSsid"));
 }

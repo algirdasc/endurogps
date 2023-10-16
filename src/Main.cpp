@@ -5,14 +5,14 @@
 #include "Main.h"
 
 Scheduler ts;
-Settings settings;
-HTTP http(ENDUROGPS_HTTP_PORT);
 WifiMode wifiMode;
 EasyButton button(GPIO_BUTTON);
 Battery battery;
 LED statusLed(LED_BUILTIN);
 SDCard sdCard;
 
+extern HTTP http(ENDUROGPS_HTTP_PORT);
+extern Settings settings;
 
 void ledBlink()
 {
@@ -24,16 +24,20 @@ Task taskStatusLedBlink(0, TASK_FOREVER, &ledBlink, &ts, false);
 void setup()
 {
     SerialMonitor.begin(LOG_BAUD_RATE);
-    delay(200);
+    delay(200);    
     log_d("ESP32 SDK: %s", ESP.getSdkVersion());
     log_d("Arduino sketch: %s", __FILE__);
     log_d("Compiled on: %s", __DATE__);
 
-    wifiMode.start(settings.get().wifiMode);
+    settings.load();
+
+    wifiMode.start(settings.storage.wifiMode);
 
     http.start();
 
-    MDNS.addService("http", "tcp", ENDUROGPS_HTTP_PORT);
+    if (MDNS.begin(ENDUROGPS_AP_MDNS)) {
+        MDNS.addService("http", "tcp", ENDUROGPS_HTTP_PORT);
+    }
 
     button.begin();
     //button.onPressedFor(1000, onPressedForDuration);
