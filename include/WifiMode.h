@@ -1,3 +1,8 @@
+#ifndef WIFIMODE_H
+#define WIFIMODE_H
+
+#include "WiFi.h"
+
 #define MAX_AP_NAME_SIZE 20
 
 class WifiMode 
@@ -16,3 +21,5 @@ class WifiMode
         void AP();
         void OFF();
 };
+
+#endif

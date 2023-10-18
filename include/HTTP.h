@@ -1,21 +1,27 @@
 #include <Arduino.h>
 #include <WebServer.h>
-#include <uri/UriBraces.h>
 
+typedef std::function<void(void)> THandlerFunction;
 class HTTP
 {
     private:
-        int port;
-        WebServer server;
+        uint port;
     
     public:
-        HTTP(int port);
+        WebServer server;
+
+        HTTP(uint port);
         
         // Control
         void start();
         void stop();
         void handleClient();
-      
+        void redirect(String uri);
+
         // Handles
         void notFound();
+        void poweredOff();       
+
+        // Mirror functions.        
+        void on(const Uri &uri, THandlerFunction fn);
 };

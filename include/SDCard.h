@@ -5,5 +5,5 @@
 class SDCard
 {
     public:
-        SDCard();
+        void start();
 };

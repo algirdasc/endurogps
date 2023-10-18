@@ -24,7 +24,7 @@ class FileBrowserHandler : public RequestHandler
             return requestUri.startsWith(URI);
         }
 
-        bool handle(WebServer& server, HTTPMethod requestMethod, String requestUri)
+        bool handle(WebServer &server, HTTPMethod requestMethod, String requestUri)
         {
             requestUri.replace(URI, "");
             if (!requestUri.startsWith("/")) {
@@ -39,7 +39,7 @@ class FileBrowserHandler : public RequestHandler
 
             File entry = SD.open(requestUri);
             if (entry.isDirectory()) {
-                server.send(200, contentTypeHtml, Template::generateBody(directoryHtmlTable(entry)));
+                server.send(200, contentTypeHtml, Template::generateBody(directoryHtmlTable(entry), "File browser"));
             } else {
                 size_t sent = server.streamFile(entry, contentTypeStream);                
             }
@@ -54,7 +54,7 @@ class FileBrowserHandler : public RequestHandler
         {
             String baseUri = String(URI) + dir.path() + "/";
             String table = R"raw(
-                <table class="table">
+                <table class="pure-table pure-table-horizontal pure-u-1">
                     <thead>
                         <tr>
                             <th></th>

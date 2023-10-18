@@ -13,7 +13,7 @@ class IndexHandler : public RequestHandler
             return requestUri == "/";
         }
 
-        bool handle(WebServer& server, HTTPMethod requestMethod, String requestUri)
+        bool handle(WebServer &server, HTTPMethod requestMethod, String requestUri)
         {
             server.send(200, contentTypeHtml, Template::generateBody(INDEX_PAGE_TEMPLATE));
 

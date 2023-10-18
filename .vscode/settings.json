@@ -26,6 +26,7 @@
         "sstream": "cpp",
         "streambuf": "cpp",
         "type_traits": "cpp",
-        "tuple": "cpp"
+        "tuple": "cpp",
+        "cstdlib": "cpp"
     }
 }

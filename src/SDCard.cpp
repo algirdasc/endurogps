@@ -1,6 +1,6 @@
 #include "SDCard.h"
 
-SDCard::SDCard() 
+void SDCard::start() 
 {
     if (!SD.begin()) {
         log_e("SD Card mount failed");
@@ -14,7 +14,6 @@ SDCard::SDCard()
 
         return;
     }
-
 
     switch (cardType) {
         case CARD_MMC:
@@ -32,5 +31,5 @@ SDCard::SDCard()
     }
 
     uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-    Serial.printf("SD Card Size: %lluMB\n", cardSize);
+    log_i("SD Card Size: %lluMB\n", cardSize);
 }

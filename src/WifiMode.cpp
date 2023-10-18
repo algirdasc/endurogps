@@ -16,16 +16,12 @@ void WifiMode::start(WiFiMode_t mode)
 {
     if (mode == WIFI_STA) {        
         WifiMode::STA();
-        log_i("Started WiFi in STA mode");
     } else if (mode == WIFI_AP) {
         WifiMode::AP();
-        log_i("Started WiFi in AP mode");
     } else if (mode == WIFI_OFF) {
         WifiMode::OFF();
-        log_i("Started WiFi in OFF mode");
     } else {
         WifiMode::AP();
-        log_i("Started WiFi in AP mode (fallback)");
     }
 }
 
@@ -54,13 +50,6 @@ void WifiMode::AP()
     WiFi.softAPConfig(ip, ip, netMask);
 
     IPAddress currentIP = WiFi.softAPIP();
-    log_i("AP IP address: %s", currentIP.toString());
-
-    // if (!MDNS.begin(ENDUROGPS_AP_MDNS)) {
-    //     log_e("Error setting up MDNS responder!");
-    // } else {
-    //     log_d("Started MDNS");
-    // }
 
     isConnected = true;
 }
@@ -71,16 +60,14 @@ void WifiMode::STA()
     
     WiFi.begin();
 
-    int times = 0;
-    while (WiFi.status() != WL_CONNECTED && times < 15) {
+    int tries = 0;
+    while (WiFi.status() != WL_CONNECTED && tries < 15) {
+        log_d("Waiting for WiFi, try #%d...", tries);
         delay(1000);
-        log_i("Connecting to WiFi");
     }
 
-    if (WiFi.status() == WL_CONNECTED) {
-
-    } else {
-        // log_e("Could not connect to SSID %s, reverting to AP mode", stored_preferences.wifi_ssid);
+    if (WiFi.status() != WL_CONNECTED) {
+        log_d("Fallbacking to AP mode");
         WifiMode::AP();
     }
 }
@@ -88,8 +75,6 @@ void WifiMode::STA()
 void WifiMode::OFF() 
 {
     WiFi.mode(WIFI_OFF);
-
-    MDNS.end();
 
     isConnected = false;
 }
