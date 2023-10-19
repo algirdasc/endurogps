@@ -1,17 +1,21 @@
 #include "Main.h"
+#include <WiFiServer.h>
+
+bool isRecording = false;
 
 Scheduler ts;
 WifiMode wifiMode;
 EasyButton button(GPIO_BUTTON);
 LED statusLed(LED_BUILTIN);
 SDCard sdCard;
-NMEAServer nmeaServer(NMEA_SERVER_PORT);
+NMEAServer nmeaServer;
 GPSPort gpsPort;
 Params params;
 Battery battery;
-HTTP http(ENDUROGPS_HTTP_PORT);
+HTTP http;
 GPSBLEProxy gpsBLEProxy;
 GPSLogProxy gpsLogProxy;
+WiFiServer testServer(11188);
 
 void ledBlink()
 {
@@ -45,7 +49,9 @@ void startRecording()
             gpsLogProxy.formatter(params.storage.logFormat);
             gpsLogProxy.start();
             break;
-    }    
+    }
+
+    isRecording = true;
 }
 
 void stopRecording()
@@ -53,16 +59,18 @@ void stopRecording()
     // gpsBLEProxy.stop();
     // gpsLogProxy.stop();
     gpsPort.powerOff();
+
+    isRecording = false;
 }
 
 void powerOff()
 {
     // TODO: redirect somewhere
-    Template::redirect(http.server, "/device/powered_off");
+    Template::redirect(http.server, "/device/please_wait");
 
     stopRecording();
 
-    nmeaServer.stop();        
+    // nmeaServer.stop();        
     statusLed.off();
 
     // http.stop();     
@@ -78,52 +86,91 @@ void powerOff()
     // esp_deep_sleep_start();
 }
 
+void restart()
+{
+    Template::redirect(http.server, "/device/please_wait");
+
+    esp_restart();
+}
+
+void buttonPressOneSec()
+{
+    isRecording ? stopRecording() : startRecording();
+}
+
+void buttonPressFiveSec() 
+{
+    switch (wifiMode.currentMode) {
+        case WIFI_AP:
+            wifiMode.mode(WIFI_STA);
+            break;
+        case WIFI_STA:
+            wifiMode.mode(WIFI_OFF);
+            break;
+        case WIFI_OFF:
+            wifiMode.mode(WIFI_AP);
+            break;
+    }
+}
+
+void buttonPressTenSec() 
+{
+    powerOff();
+}
+
 void setup()
 {
     SerialMonitor.begin(LOG_BAUD_RATE);
-    delay(200);    
-    log_d("ESP32 SDK: %s", ESP.getSdkVersion());
-    log_d("Arduino sketch: %s", __FILE__);
-    log_d("Compiled on: %s", __DATE__);
-
-    // Bind some web functions
-    http.on("/device/poweroff", powerOff);
-    http.on("/device/restart", esp_restart);
+    // log_d("ESP32 SDK: %s", ESP.getSdkVersion());
+    // log_d("Arduino sketch: %s", __FILE__);
+    // log_d("Compiled on: %s", __DATE__);
 
     // Load parameters
     params.load();    
 
-    sdCard.start();
+    // Initialize sd card
+    //sdCard.start();
+    // TODO: check for firmware in SDCARD
 
     // Start wifi & services
-    wifiMode.start(params.storage.wifiMode);
+    wifiMode.setSTAcredentials(params.storage.wifiStaSsid, params.storage.wifiStaPass);
+    wifiMode.mode(params.storage.wifiMode);
+
+    // Start webServer
+    // TODO: check if WIFI is up
+    // Bind some web functions
+    http.on("/device/poweroff", powerOff);
+    http.on("/device/restart", restart);
     http.start();
 
-    MDNS.begin(ENDUROGPS_AP_MDNS);
-    MDNS.addService("http", "tcp", ENDUROGPS_HTTP_PORT);
-
-    button.begin();
-    //button.onPressedFor(1000, onPressedForDuration);
-    //button.onPressedFor(5000, onPressedForDuration);
-    //button.onPressedFor(10000, onPressedForDuration);
-
+    // NMEAServer
     nmeaServer.start();
 
-    taskStatusLedBlink.setInterval(1000);
-    taskStatusLedBlink.disable();
+    // SDCard support
+    sdCard.start();
+
+    // Button control
+    button.begin();
+    button.onPressedFor(1000, buttonPressOneSec);
+    button.onPressedFor(3000, buttonPressFiveSec);
+    button.onPressedFor(10000, buttonPressTenSec);
+
+    // taskStatusLedBlink.setInterval(1000);
+    // taskStatusLedBlink.disable();
+
 
     statusLed.off();
 
     // startRecording();
 
     // Dump information
-    log_d("Battery voltage: %.2f V", battery.voltage());
-    log_d("Battery percentage: %d %%", battery.percentage());
+    // log_d("Battery voltage: %.2f V", battery.voltage());
+    // log_d("Battery percentage: %d %%", battery.percentage());
 
-    log_d("Total heap: %d", ESP.getHeapSize());
-    log_d("Free heap: %d", ESP.getFreeHeap());
-    log_d("Total PSRAM: %d", ESP.getPsramSize());
-    log_d("Free PSRAM: %d", ESP.getFreePsram());
+    // log_d("Total heap: %d", ESP.getHeapSize());
+    // log_d("Free heap: %d", ESP.getFreeHeap());
+    // log_d("Total PSRAM: %d", ESP.getPsramSize());
+    // log_d("Free PSRAM: %d", ESP.getFreePsram());
 }
 
 void loop()

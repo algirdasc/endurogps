@@ -49,7 +49,7 @@ const char WEBPORTAL_HEADER[] PROGMEM = R"raw(
                     </ul>
 
                     <div class="menu-bottom">
-                        <a href="https://github.com/)raw" GIT_REPO "\">" ENDUROGPS_VERSION R"raw(</a>
+                        <a href="https://github.com/)raw" GIT_REPO "\">" VERSION R"raw(</a>
                     </div>
                 </div>
             </div>

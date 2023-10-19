@@ -1,4 +1,6 @@
 #include <Arduino.h>
+
+#include "EnduroGPS.h"
 #include "GPS/UBLOXMessages.h"
 
 // TODO: move to params?

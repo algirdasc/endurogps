@@ -4,12 +4,11 @@
 class NMEAServer
 {
     private:
-        uint port;
         WiFiServer server;
         WiFiClient client;
 
     public:
-        NMEAServer(uint port);
+        NMEAServer();
 
         bool isStarted = false;
 

@@ -7,19 +7,23 @@
 
 class WifiMode 
 {
-    private:
+    private:        
         char accessPointSSID[MAX_AP_NAME_SIZE];
-
-    public:
-        WifiMode();
-
-        bool isConnected = false;
-
-        void start(WiFiMode_t mode);
+        String STASsid;
+        String STAKey;
 
         void STA();
         void AP();
         void OFF();
+
+    public:
+        WifiMode();
+
+        WiFiMode_t currentMode;
+        bool isConnected = false;
+
+        void mode(WiFiMode_t mode);
+        void setSTAcredentials(String STASsid, String STAKey);
 };
 
 #endif

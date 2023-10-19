@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <EasyButton.h>
 #include <TaskScheduler.h>
-#include <ESPmDNS.h>
 
 #include "EnduroGPS.h"
 #include "HTTP/Template.h"

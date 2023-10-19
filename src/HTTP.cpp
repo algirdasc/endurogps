@@ -7,16 +7,15 @@
 #include "HTTP/Handlers/SettingsFirmwareHandler.h"
 #include "HTTP/Handlers/SettingsGPSHandler.h"
 
-HTTP::HTTP(uint port) 
+HTTP::HTTP() 
 {
-    HTTP::port = port;
-    WebServer server(HTTP::port);
+    WebServer server;
 }
 
 void HTTP::start() 
 {
     server.onNotFound(std::bind(&HTTP::notFound, this));
-    server.on("/device/powered_off", std::bind(&HTTP::poweredOff, this));
+    server.on("/device/please_wait", std::bind(&HTTP::pleaseWait, this));
 
     server.addHandler(new AssetHandler());
     server.addHandler(new IndexHandler());
@@ -25,9 +24,9 @@ void HTTP::start()
     server.addHandler(new SettingsFirmwareHandler());
     server.addHandler(new FileBrowserHandler());
 
-    server.begin();
+    server.begin(HTTP_PORT);
 
-    log_d("Web server started on port %d", HTTP::port);
+    log_d("Web server started on port %d", HTTP_PORT);
 }
 
 void HTTP::on(const Uri &uri, THandlerFunction fn)
@@ -60,9 +59,9 @@ void HTTP::redirect(String uri)
     );
 }
 
-void HTTP::poweredOff()
+void HTTP::pleaseWait()
 {
     server.send(200, contentTypeHtml, 
-        Template::generateBody("", "Powering off", "Device is powering off")
+        Template::generateBody("", "Please wait", "Device is executing your command")
     );
 }

@@ -41,7 +41,7 @@ void Params::load()
 
     storage.gpsMode = preferences.getUInt("gpsMode", GPS_MODE_CSV);
     storage.gpsRateHz = preferences.getUInt("gpsRateHz", 10);
-    storage.gpsBaudRate = preferences.getUInt("gpsBaudRate", GPS_STANDARD_BAUD_RATE);
+    storage.gpsBaudRate = preferences.getUInt("gpsBaudRate", GPS_BAUD_RATE);
     storage.gpsPowerSave = preferences.getUInt("gpsPowerSave", GPSPORT_POWER_SAVE);
 
     storage.nmeaTcpEnabled = preferences.getBool("nmeaTcpEnabled", false);

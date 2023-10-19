@@ -1,9 +1,8 @@
 #include "GPS/GPSPort.h"
-#include "EnduroGPS.h"
 
 void GPSPort::initialize()
 {    
-    GPSSerial.begin(GPS_STANDARD_BAUD_RATE, SERIAL_8N1, GPS_RX, GPS_TX);
+    GPSSerial.begin(GPS_BAUD_RATE, SERIAL_8N1, GPIO_GPS_RX, GPIO_GPS_TX);
 
     pushMessage(UBLOX_WARMSTART);
 
@@ -12,16 +11,16 @@ void GPSPort::initialize()
     GPSSerial.end();
     delay(250);
 
-    GPSSerial.setRxBufferSize(UART_BUFFER_SIZE_RX);
+    GPSSerial.setRxBufferSize(GPS_RX_BUFFER_SIZE);
 
-    GPSSerial.begin(0, SERIAL_8N1, GPS_RX, GPS_TX, false, GPS_UART_TIMEOUT);
-    log_d("Start UART connection on RX pin %d, TX pin %d and autobaudrate", GPS_RX, GPS_TX);
+    GPSSerial.begin(0, SERIAL_8N1, GPIO_GPS_RX, GPIO_GPS_TX, false, GPS_UART_TIMEOUT);
+    log_d("Start UART connection on RX pin %d, TX pin %d and autobaudrate", GPIO_GPS_RX, GPIO_GPS_TX);
     if (GPSSerial.baudRate() > 0) {
         log_d("Connected with auto-baudrate at %u", GPSSerial.baudRate());
     } else {
-        log_e("Can't auto find BAUD rate, forcing %u", GPS_STANDARD_BAUD_RATE);
+        log_e("Can't auto find BAUD rate, forcing %u", GPS_BAUD_RATE);
         // TODO: enable pulsing error on the LED to signal the user that something is bad
-        GPSSerial.begin(GPS_STANDARD_BAUD_RATE, SERIAL_8N1, GPS_RX, GPS_TX);
+        GPSSerial.begin(GPS_BAUD_RATE, SERIAL_8N1, GPIO_GPS_RX, GPIO_GPS_TX);
     }
 }
 

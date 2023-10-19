@@ -1,20 +1,17 @@
 #include "NMEAServer.h"
 
-NMEAServer::NMEAServer(uint port)
+NMEAServer::NMEAServer()
 {
-    NMEAServer::port = port;    
-    WiFiClient client;
+    WiFiServer server(NMEA_PORT);
 }
 
 void NMEAServer::start()
-{
-    WiFiServer server(NMEAServer::port);
-
+{    
     server.begin();
     server.setNoDelay(true);
-    
+
     isStarted = true;
-    log_d("Starting NMEA TCP Server on port TCP %d", port);
+    log_d("Starting NMEA TCP Server on port TCP %d", NMEA_PORT);
 }
 
 void NMEAServer::stop()
@@ -27,10 +24,13 @@ void NMEAServer::stop()
 void NMEAServer::handleClient()
 {
     if (!isStarted) {
+        log_d("Not started");
+        
         return;
     }
 
-    if (!server.hasClient()) {
+    WiFiClient client = server.available();
+    if (!client) {
         return;
     }
     

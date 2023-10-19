@@ -1,16 +1,14 @@
 #include <Arduino.h>
 #include <WebServer.h>
+#include "EnduroGPS.h"
 
 typedef std::function<void(void)> THandlerFunction;
 class HTTP
 {
-    private:
-        uint port;
-    
     public:
         WebServer server;
 
-        HTTP(uint port);
+        HTTP();
         
         // Control
         void start();
@@ -20,7 +18,7 @@ class HTTP
 
         // Handles
         void notFound();
-        void poweredOff();       
+        void pleaseWait();       
 
         // Mirror functions.        
         void on(const Uri &uri, THandlerFunction fn);

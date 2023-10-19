@@ -7,14 +7,14 @@
 
 WifiMode::WifiMode() {
   uint16_t chip = (uint16_t)((uint64_t) ESP.getEfuseMac() >> 32);
-  sprintf(accessPointSSID, "%s-%04X", ENDUROGPS_AP_SSID, chip);
+  sprintf(accessPointSSID, "%s-%04X", WIFI_AP_SSID, chip);
 
-  WiFi.setHostname(ENDUROGPS_AP_MDNS);
+  WiFi.setHostname(WIFI_AP_MDNS);
 }
 
-void WifiMode::start(WiFiMode_t mode)
+void WifiMode::mode(WiFiMode_t mode)
 {
-    if (mode == WIFI_STA) {        
+    if (mode == WIFI_STA) {                
         WifiMode::STA();
     } else if (mode == WIFI_AP) {
         WifiMode::AP();
@@ -27,6 +27,8 @@ void WifiMode::start(WiFiMode_t mode)
 
 void WifiMode::AP() 
 {
+    currentMode = WIFI_AP;
+
     WiFi.mode(WIFI_AP);
 
     wifi_country_t country {
@@ -39,7 +41,7 @@ void WifiMode::AP()
 
     esp_wifi_set_country(&country);
 
-    WiFi.softAP(accessPointSSID, ENDUROGPS_AP_PASS, 1, 0, 2);
+    WiFi.softAP(accessPointSSID, WIFI_AP_PASS, 1, 0, 2);
     log_i("Wait 100 ms for AP_START...");
     delay(100);
     log_d("Power: %d", WiFi.getTxPower());
@@ -56,9 +58,11 @@ void WifiMode::AP()
 
 void WifiMode::STA() 
 {
+    currentMode = WIFI_STA;
+
     WiFi.mode(WIFI_STA);
-    
-    WiFi.begin();
+    WiFi.begin(STASsid, STAKey);
+    log_d("Connecting to %s", STASsid);
 
     int tries = 0;
     while (WiFi.status() != WL_CONNECTED && tries < 15) {
@@ -74,7 +78,15 @@ void WifiMode::STA()
 
 void WifiMode::OFF() 
 {
+    currentMode = WIFI_OFF;
+
     WiFi.mode(WIFI_OFF);
 
     isConnected = false;
+}
+
+void WifiMode::setSTAcredentials(String STASsid, String STAKey)
+{
+    WifiMode::STASsid = STASsid;
+    WifiMode::STAKey = STAKey;
 }
