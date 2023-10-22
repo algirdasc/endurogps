@@ -27,4 +27,6 @@
 #define SerialMonitor       Serial
 #define GPSSerial           Serial2
 
-
+// Misc
+#define UPDATE_FILE_PATH    "/update.bin"
+#define UPDATE_FILE_URL     "https://tools.cici.lt/update.php"

@@ -125,6 +125,9 @@ void setup()
     // log_d("Arduino sketch: %s", __FILE__);
     // log_d("Compiled on: %s", __DATE__);
 
+    // SDCard start & check for updates
+    sdCard.start();
+
     // Load parameters
     params.load();    
 
@@ -145,9 +148,6 @@ void setup()
 
     // NMEAServer
     nmeaServer.start();
-
-    // SDCard support
-    sdCard.start();
 
     // Button control
     button.begin();

@@ -3,30 +3,16 @@
 #include <SD.h>
 #include <WebServer.h>
 
+#include "Translation.h"
 #include "HTTP/URL.h"
 #include "HTTP/Template.h"
-
-const char* BASE_URL = "/sdcard";
-
-const char FILE_BROWSER_TABLE_HEADER_TEMPLATE[] PROGMEM = R"raw(
-    <table class="pure-table pure-table-horizontal pure-table-stretch">
-        <thead>
-            <tr>
-                <th></th>
-                <th>Filename</th>
-                <th>Size</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-    )raw";
-
 
 class FileBrowserHandler : public RequestHandler
 {
     public:
         bool canHandle(HTTPMethod requestMethod, String requestUri)
         {
-            return requestUri.startsWith(BASE_URL);
+            return requestUri.startsWith(FILEBROWSER_PAGE_BASE_URL);
         }
 
         bool handle(WebServer &server, HTTPMethod requestMethod, String requestUri)
@@ -39,7 +25,7 @@ class FileBrowserHandler : public RequestHandler
 
             if (!SD.exists(sdCardPath)) {
                 server.send(404, contentTypeHtml, 
-                    Template::generateBody("", "SD Card error", "SD Card is unavailable or path does not exist")
+                    Template::generateBody("", FILEBROWSER_PAGE_TITLE, FILEBROWSER_PAGE_404_ERROR)
                 );
 
                 return true;
@@ -55,9 +41,8 @@ class FileBrowserHandler : public RequestHandler
             }
 
             if (entry.isDirectory()) {
-                log_d("Entry: %s", entry.path());
                 server.send(200, contentTypeHtml, 
-                    Template::generateBody(directoryHtmlTable(entry), "File browser", entry.path())
+                    Template::generateBody(directoryHtmlTable(entry), FILEBROWSER_PAGE_TITLE, entry.path())
                 );
             } else {
                 size_t sent = server.streamFile(entry, contentTypeStream);                
@@ -89,7 +74,7 @@ class FileBrowserHandler : public RequestHandler
 
         String absoluteUrl(String path)
         {
-            return String(BASE_URL) + path;
+            return String(FILEBROWSER_PAGE_BASE_URL) + path;
         }
 
         String parentDir(String path) 
@@ -102,7 +87,7 @@ class FileBrowserHandler : public RequestHandler
         String directoryHtmlTable(File dir)
         {            
             String parentUrl = absoluteUrl(parentDir(dir.path()));
-            String table = FILE_BROWSER_TABLE_HEADER_TEMPLATE;
+            String table = FILEBROWSER_PAGE_TABLE_HEADER_TEMPLATE;
 
             if (!String(dir.path()).equalsIgnoreCase("/")) {
                 table += R"raw(
@@ -121,13 +106,7 @@ class FileBrowserHandler : public RequestHandler
                 File entry = dir.openNextFile();
                 if (!entry) {
                     if (fileCount == 0) {
-                        table += R"raw(
-                            <tr>
-                                <td class="text-center" colspan="100">
-                                    Directory is empty
-                                </td>
-                            </tr>
-                        )raw";
+                        table += FILEBROWSER_PAGE_DIRECTORY_EMPTY_ROW
                     }
 
                     break;                    
@@ -135,6 +114,7 @@ class FileBrowserHandler : public RequestHandler
 
                 fileCount++;    
 
+                // TODO: optimize icon html
                 String icon = R"raw(<span class="icon file"></span>)raw";
                 if (entry.isDirectory()) {
                     icon = R"raw(<span class="icon folder"></span>)raw";

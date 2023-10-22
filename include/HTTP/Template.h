@@ -101,7 +101,7 @@ class Template
             Battery battery;
 
             uint batteryPercentage = battery.percentage();
-            uint batteryIconClass = (7 * batteryPercentage) / 100;
+            uint batteryIconClass = (6 * batteryPercentage) / 100;
 
             return R"raw(<div id="battery"><span class="icon battery-)raw" + String(batteryIconClass) + R"raw("></span> <span id="battery_percent">)raw" + String(batteryPercentage) + R"raw(%</span></div>)raw";
         }

@@ -44,7 +44,7 @@ class SettingsGPSHandler : public RequestHandler
             params.load();
 
             if (requestMethod == HTTP_POST) {
-                return SettingsGPSHandler::handlePost(server, requestMethod, requestUri);
+                return handlePost(server, requestMethod, requestUri);
             }
 
             String htmlOutput = HTML::formStart();            
