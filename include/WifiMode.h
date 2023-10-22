@@ -1,5 +1,4 @@
-#ifndef WIFIMODE_H
-#define WIFIMODE_H
+#pragma once
 
 #include "WiFi.h"
 
@@ -25,5 +24,3 @@ class WifiMode
         void mode(WiFiMode_t mode);
         void setSTAcredentials(String STASsid, String STAKey);
 };
-
-#endif

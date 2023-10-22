@@ -1,10 +1,9 @@
+#pragma once
+
 #include "HTML.h"
 #include "EnduroGPS.h"
 #include "Battery.h"
 #include "WebServer.h"
-
-#ifndef TEMPLATE_H
-#define TEMPLATE_H
 
 #define WEBPORTAL_HEADER_STATIC_SIZE 350
 #define WEBPORTAL_HEADER_DYN_SIZE 150
@@ -48,7 +47,7 @@ const char WEBPORTAL_HEADER[] PROGMEM = R"raw(
                         </li>
                     </ul>
 
-                    <div class="menu-bottom">
+                    <div class="menu-bottom">                        
                         <a href="https://github.com/)raw" GIT_REPO "\">" VERSION R"raw(</a>
                     </div>
                 </div>
@@ -67,9 +66,7 @@ class Template
 {
     public:
         static String generateBody(String content, String title = "", String subtitle = "") 
-        {
-            Battery battery;
-
+        {            
             String htmlBody((char *) 0);
 
             htmlBody.reserve(WEBPORTAL_HEADER_STATIC_SIZE + WEBPORTAL_HEADER_DYN_SIZE + WEBPORTAL_FOOTER_STATIC_SIZE + content.length());
@@ -85,7 +82,7 @@ class Template
             }
 
             htmlBody += "<div class=\"content\">" + content + "</div>";
-            htmlBody += String(battery.percentage());
+            htmlBody += String(batteryContainer());
             htmlBody += String(WEBPORTAL_FOOTER);
 
             return htmlBody;
@@ -95,10 +92,18 @@ class Template
         {
             server.sendHeader("Location", uri);
             server.send(302, contentTypeHtml, 
-                Template::generateBody("<div class=\"text-center\">Redirecting to <a href=\"uri\">" + uri + "</a></div>")
+                Template::generateBody("<div class=\"text-center\">Redirecting to <a href=\"" + uri + "\">" + uri + "</a></div>")
             );
         }
 
-};
+        static String batteryContainer()
+        {
+            Battery battery;
 
-#endif
+            uint batteryPercentage = battery.percentage();
+            uint batteryIconClass = (7 * batteryPercentage) / 100;
+
+            return R"raw(<div id="battery"><span class="icon battery-)raw" + String(batteryIconClass) + R"raw("></span> <span id="battery_percent">)raw" + String(batteryPercentage) + R"raw(%</span></div>)raw";
+        }
+
+};

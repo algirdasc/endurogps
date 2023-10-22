@@ -1,5 +1,4 @@
-#ifndef HTML_H
-#define HTML_H
+#pragma once
 
 #include <Arduino.h>
 
@@ -62,5 +61,3 @@ class HTML
             return select;
         }
 };
-
-#endif

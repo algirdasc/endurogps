@@ -1,3 +1,5 @@
+#pragma once
+
 #include <WebServer.h>
 #include "Device.h"
 #include "HTTP/Template.h"

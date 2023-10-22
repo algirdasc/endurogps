@@ -1,11 +1,15 @@
+#pragma once
+
 #include <SD.h>
 #include <WebServer.h>
 
+#include "HTTP/URL.h"
 #include "HTTP/Template.h"
 
-const char* URI = "/sdcard";
+const char* BASE_URL = "/sdcard";
 
 const char FILE_BROWSER_TABLE_HEADER_TEMPLATE[] PROGMEM = R"raw(
+    <table class="pure-table pure-table-horizontal pure-table-stretch">
         <thead>
             <tr>
                 <th></th>
@@ -22,16 +26,16 @@ class FileBrowserHandler : public RequestHandler
     public:
         bool canHandle(HTTPMethod requestMethod, String requestUri)
         {
-            return requestUri.startsWith(URI);
+            return requestUri.startsWith(BASE_URL);
         }
 
         bool handle(WebServer &server, HTTPMethod requestMethod, String requestUri)
         {            
-            String sdCardPath = String(requestUri);
+            String sdCardPath = server.urlDecode(requestUri);
             sdCardPath.remove(0, 8);
-            sdCardPath = ensureRootPrefix(sdCardPath);
-
-            log_d("sdCardPath: %s", sdCardPath);
+            if (!sdCardPath.startsWith("/")) {
+                sdCardPath = "/" + sdCardPath;
+            }
 
             if (!SD.exists(sdCardPath)) {
                 server.send(404, contentTypeHtml, 
@@ -43,16 +47,17 @@ class FileBrowserHandler : public RequestHandler
 
             File entry = SD.open(sdCardPath);
             if (server.hasArg("delete")) {
-                entry.isDirectory() ? SD.rmdir(sdCardPath) : SD.remove(sdCardPath);
+                entry.isDirectory()? SD.rmdir(sdCardPath) : SD.remove(sdCardPath);
 
-                Template::redirect(server, parentDir(sdCardPath));
+                Template::redirect(server, absoluteUrl(parentDir(entry.path())));
 
                 return true;
             }
 
             if (entry.isDirectory()) {
+                log_d("Entry: %s", entry.path());
                 server.send(200, contentTypeHtml, 
-                    Template::generateBody(directoryHtmlTable(entry), "File browser: " + sdCardPath)
+                    Template::generateBody(directoryHtmlTable(entry), "File browser", entry.path())
                 );
             } else {
                 size_t sent = server.streamFile(entry, contentTypeStream);                
@@ -66,7 +71,7 @@ class FileBrowserHandler : public RequestHandler
     private:
         char* bytesToHumanReadable(size_t size)
         {
-            char *suffix[5] = {"B", "KB", "MB", "GB", "TB"};
+            const char *suffix[5] = {"B", "KB", "MB", "GB", "TB"};
 
             int i = 0;
 	        double dblBytes = size;
@@ -82,85 +87,80 @@ class FileBrowserHandler : public RequestHandler
             return output;
         }
 
-        String parentDir(String path) {
+        String absoluteUrl(String path)
+        {
+            return String(BASE_URL) + path;
+        }
+
+        String parentDir(String path) 
+        {
             int index = path.lastIndexOf("/");
 
-            return ensureRootPrefix(path.substring(0, index));
-        }
-
-        String joinPath(String path, String file)
-        {
-            if (!path.endsWith("/")) {
-                return path + "/" + file;
-            }
-
-            return path + file;
-        }
-
-        String ensureRootPrefix(String path)
-        {
-            if (!path.startsWith("/")) {
-                path = "/" + path;
-            }
-
-            return path;
+            return path.substring(0, index);
         }
 
         String directoryHtmlTable(File dir)
-        {
-            log_d("Directory %s", dir.path());
+        {            
+            String parentUrl = absoluteUrl(parentDir(dir.path()));
+            String table = FILE_BROWSER_TABLE_HEADER_TEMPLATE;
 
-            String baseUri = joinPath(String(URI), dir.path());
-            String table = R"raw(
-                <div class="pure-g">
-                    <div class="pure-u-1-1">
-                        <table class="pure-table pure-table-horizontal pure-table-stretch">
-                            <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>Filename</th>
-                                    <th>Size</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-            )raw";
+            if (!String(dir.path()).equalsIgnoreCase("/")) {
+                table += R"raw(
+                    <tr>
+                        <td>                    
+                            <a href=")raw" + parentUrl + R"raw("><span class="icon folder-open"></span></a>
+                        </td>
+                        <td colspan="100">
+                            <a href=")raw" + parentUrl + R"raw(">Back</a>
+                        </td>
+                    </tr>)raw";
+            }
 
-            table += "<tr><td colspan='100'><a href='" + parentDir(baseUri) +"'>../</a></td></tr>";
-
+            uint fileCount = 0;
             while (true) {
                 File entry = dir.openNextFile();
                 if (!entry) {
-                    break;
-                }                
+                    if (fileCount == 0) {
+                        table += R"raw(
+                            <tr>
+                                <td class="text-center" colspan="100">
+                                    Directory is empty
+                                </td>
+                            </tr>
+                        )raw";
+                    }
 
-                log_d("Entry: %s", entry.name());
+                    break;                    
+                }            
 
-                String entryUri = joinPath(baseUri, entry.name());
+                fileCount++;    
 
-                String icon = "FILE";
+                String icon = R"raw(<span class="icon file"></span>)raw";
                 if (entry.isDirectory()) {
-                    icon = "DIR";
+                    icon = R"raw(<span class="icon folder"></span>)raw";
                 }
 
+                String entryAbsoluteUrl = absoluteUrl(entry.path());
+                                
                 table += "<tr>";
                 table += "<td>" + icon + "</td>";
-                table += "<td><a href=\"" + entryUri + "\">";
+                table += "<td><a href=\"" + entryAbsoluteUrl + "\">";
                 table += entry.name();
                 table += "</a></td>";
 
                 table += "<td><span>";
-                table += bytesToHumanReadable(entry.size());
+                table += entry.isDirectory() ? "" : bytesToHumanReadable(entry.size());
                 table += "</span></td>";
 
-                table += "<td><a href=\"" + entryUri + "?delete=1\" onclick=\"confirm('Are you sure you want to delete this item?');\">";
-                table += "Delete";
+                table += "<td class=\"text-center\"><a href=\"" + entryAbsoluteUrl + "?delete=1\" onclick=\"confirm('Are you sure you want to delete this item?');\">";
+                table += "<span class=\"icon delete\"></span>";
                 table += "</a></td>";
 
                 table += "</tr>";
 
                 entry.close();                        
             }
+
             table += "</tbody></table></div></div>";
 
             return table;

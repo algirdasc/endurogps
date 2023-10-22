@@ -1,3 +1,5 @@
+#pragma once
+
 #include <WebServer.h>
 #include "GPS/GPSPort.h"
 #include "Params.h"

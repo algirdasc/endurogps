@@ -1,5 +1,4 @@
-#ifndef TRACK_ADDICT_CSV_FORMATTER_H
-#define TRACK_ADDICT_CSV_FORMATTER_H
+#pragma once
 
 #include "BaseFormatter.h"
 
@@ -10,5 +9,3 @@ class TrackAddictCSVFormatter : public BaseFormatter
         bool write(File file, gps_fix gpsFix);
         void writeHeader(File file);
 };
-
-#endif

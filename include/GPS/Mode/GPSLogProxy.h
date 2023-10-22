@@ -1,3 +1,5 @@
+#pragma once
+
 #include <GPSfix_cfg.h>
 #include <NMEAGPS.h>
 #include <Streamers.h>

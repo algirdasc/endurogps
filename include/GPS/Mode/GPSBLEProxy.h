@@ -1,3 +1,5 @@
+#pragma once
+
 #include "BluetoothSerial.h"
 #include "esp_bt.h"
 

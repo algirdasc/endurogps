@@ -1,5 +1,4 @@
-#ifndef BATTERY_H
-#define BATTERY_H
+#pragma once
 
 #include <Arduino.h>
 
@@ -9,5 +8,3 @@ class Battery
         float voltage();
         uint8_t percentage();
 };
-
-#endif

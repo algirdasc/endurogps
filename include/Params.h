@@ -1,5 +1,4 @@
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#pragma once
 
 #include <Preferences.h>
 #include <WiFi.h>
@@ -45,5 +44,3 @@ class Params
         WiFiMode_t wifiMode(String wifiMode);
         StoredSettingsStruct storage;
 };
-
-#endif

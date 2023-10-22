@@ -1,5 +1,4 @@
-#ifndef VOB_FORMATTER_H
-#define VOB_FORMATTER_H
+#pragma once
 
 #include "BaseFormatter.h"
 
@@ -9,5 +8,3 @@ class VOBFormatter : public BaseFormatter
         File create();
         bool write(File file, gps_fix gpsFix);
 };
-
-#endif
