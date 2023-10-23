@@ -13,12 +13,19 @@
 
 //#define NMEAGPS_KEEP_NEWEST_FIXES true
 //#define NMEAGPS_PARSING_SCRATCHPAD
-//#define NMEAGPS_TIMESTAMP_FROM_INTERVAL
 //#define NMEAGPS_DERIVED_TYPES
 //#define NMEAGPS_PARSE_PROPRIETARY
 //#define NMEAGPS_PARSE_MFR_ID
+
+// #define GPS_FIX_LAT_ERR
+// #define GPS_FIX_LON_ERR
+// #undef NEOGPS_PACKED_DATA
+// #define USE_FLOAT
+
 #define TIME_EPOCH_MODIFIABLE
-#undef NEOGPS_PACKED_DATA
+//#define NMEAGPS_TIMESTAMP_FROM_PPS
+#define NMEAGPS_TIMESTAMP_FROM_INTERVAL
+#define NMEAGPS_RECOGNIZE_ALL
 
 class GPSLogProxy
 {
@@ -28,6 +35,7 @@ class GPSLogProxy
         BaseFormatter *logFormatter;
         File logFile;
         bool isStarted = false;
+        bool fileCreated = false;
 
     public:
         GPSLogProxy();

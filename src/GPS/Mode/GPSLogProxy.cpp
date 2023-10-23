@@ -22,13 +22,13 @@ void GPSLogProxy::formatter(uint formatter)
 void GPSLogProxy::start()
 {
     isStarted = true;
-    logFile = logFormatter->create();
+    fileCreated = false;    
 }
 
 void GPSLogProxy::stop()
 {
     isStarted = false;
-    logFile.close();
+    logFormatter->close(logFile);
 }
 
 void GPSLogProxy::handle(char *data, size_t size)
@@ -46,6 +46,17 @@ void GPSLogProxy::handle(char *data, size_t size)
 
     if (nmeaGps.available()) {
         gpsFix = nmeaGps.read();
+        if (!fileCreated && (!gpsFix.valid.date || !gpsFix.valid.time)) {
+            log_d("Waiting for valid GPS date/time to create file");
+
+            return;
+        }
+
+        if (!fileCreated) {
+            logFile = logFormatter->create(gpsFix);
+            fileCreated = true;
+        }
+
         trace_all(SerialMonitor, nmeaGps, gpsFix);
         if (!logFormatter->write(logFile, gpsFix)) {
             stop();
@@ -56,10 +67,5 @@ void GPSLogProxy::handle(char *data, size_t size)
     if (nmeaGps.overrun()) {
         nmeaGps.overrun(false);
         log_e("Too much data");
-    } 
-
-    // if (!logFormatter->write(logFile, gpsFix)) {
-    //     stop();
-    //     log_e("Failed to write GPS data");
-    // }
+    }
 }
