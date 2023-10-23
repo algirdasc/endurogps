@@ -2,15 +2,24 @@
 
 #include <WiFi.h>
 #include <WebServer.h>
+
 #include "Params.h"
+
+
+const char WIFI_PAGE_BASE_URL[] PROGMEM = "/settings/wifi";
+const char WIFI_PAGE_WIFI_MODE[] PROGMEM = "Wireless mode";
+const char WIFI_PAGE_WIFI_SSID[] PROGMEM = "Wireless network";
+
+const char *WIFI_PAGE_MODE_VALUES[] PROGMEM = {PARAM_WIFI_AP, PARAM_WIFI_STA, PARAM_WIFI_OFF};
+const char *WIFI_PAGE_MODE_LABELS[] PROGMEM = {"Access Point", "Client", "Off"};
+
 
 class SettingsWifiHandler : public RequestHandler
 {
     private:
         Params params;
 
-        String wifiModeValues[3] = {"WIFI_AP", "WIFI_STA", "WIFI_OFF"};
-        String wifiModeLabels[3] = {"Access Point", "Client", "Off"};
+        String wifiModeValues[3] = {PARAM_WIFI_AP, PARAM_WIFI_STA, PARAM_WIFI_OFF};
 
         uint availableWifiStations = 0;
         String wifiStationsValues[128] = {};
@@ -19,7 +28,7 @@ class SettingsWifiHandler : public RequestHandler
     public:
         bool canHandle(HTTPMethod requestMethod, String requestUri)
         {
-            return requestUri == "/settings/wifi";
+            return requestUri == WIFI_PAGE_BASE_URL;
         }
 
         bool handle(WebServer &server, HTTPMethod requestMethod, String requestUri)
@@ -32,12 +41,12 @@ class SettingsWifiHandler : public RequestHandler
 
             String htmlOutput = HTML::formStart();
 
-            htmlOutput += HTML::select("Wireless mode", "wifiMode", wifiModeValues, wifiModeLabels, 3, params.wifiMode(params.storage.wifiMode));                                   
+            htmlOutput += HTML::select2(WIFI_PAGE_WIFI_MODE, PARAM_WIFI_MODE, wifiModeValues, WIFI_PAGE_MODE_LABELS, 3, params.wifiMode(params.storage.wifiMode));                                   
 
             htmlOutput += R"raw(<fieldset id="wifi_sta"><legend>Available networks <a href="/settings/wifi?scan=1" class="float-right">Scan</a></legend><div class="pure-g">)raw";
 
             htmlOutput += R"raw(<div class="pure-u-3-5">)raw";
-            if (server.hasArg(("scan"))) {
+            if (server.hasArg(F("scan"))) {
                 availableWifiStations = WiFi.scanNetworks();
                 if (availableWifiStations > 0) {                               
                     for (int i = 0; i < availableWifiStations; i++) {
@@ -48,14 +57,14 @@ class SettingsWifiHandler : public RequestHandler
 
                 WiFi.scanDelete();
                
-                htmlOutput += HTML::select("Wireless network", "wifiStaSsid", wifiStationsValues, wifiStationsLabels, availableWifiStations, params.storage.wifiStaSsid);                
+                htmlOutput += HTML::select(WIFI_PAGE_WIFI_SSID, PARAM_WIFI_STA_SSID, wifiStationsValues, wifiStationsLabels, availableWifiStations, params.storage.wifiStaSsid);                
             } else {
-                htmlOutput += HTML::input("Wireless network", "wifiStaSsid", params.storage.wifiStaSsid);
+                htmlOutput += HTML::input(WIFI_PAGE_WIFI_SSID, PARAM_WIFI_STA_SSID, params.storage.wifiStaSsid);
             }
             htmlOutput += "</div>";
 
             htmlOutput += R"raw(<div class="pure-u-2-5">)raw";
-            htmlOutput += HTML::input("Password", "wifiStaPass", params.storage.wifiStaPass, "password");
+            htmlOutput += HTML::input(F("Password"), PARAM_WIFI_STA_PASS, params.storage.wifiStaPass, "password");
             htmlOutput += "</div>";
 
             htmlOutput += "</div></fieldset>";
@@ -69,20 +78,19 @@ class SettingsWifiHandler : public RequestHandler
 
         bool handlePost(WebServer &server, HTTPMethod requestMethod, String requestUri)
         {
-            params.storage.wifiMode = params.wifiMode(server.arg("wifiMode"));
+            params.storage.wifiMode = params.wifiMode(server.arg(PARAM_WIFI_MODE));
 
-            if (server.hasArg("wifiStaSsid")) {
-                params.storage.wifiStaSsid = server.arg("wifiStaSsid");
+            if (server.hasArg(PARAM_WIFI_STA_SSID)) {
+                params.storage.wifiStaSsid = server.arg(PARAM_WIFI_STA_SSID);
             }
 
-            if (server.hasArg("wifiStaPass")) {
-                params.storage.wifiStaPass = server.arg("wifiStaPass");
+            if (server.hasArg(PARAM_WIFI_STA_PASS)) {
+                params.storage.wifiStaPass = server.arg(PARAM_WIFI_STA_PASS);
             }
 
             params.save();
 
-            server.sendHeader("Location", "/settings/wifi", true);
-            server.send(302, contentTypeHtml, "");
+            Template::redirect(server, WIFI_PAGE_BASE_URL);
 
             return true;
         }

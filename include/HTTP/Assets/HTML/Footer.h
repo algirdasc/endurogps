@@ -1,0 +1,1 @@
+const char HTML_FOOTER[] PROGMEM = "</div></div></div></body></html>";

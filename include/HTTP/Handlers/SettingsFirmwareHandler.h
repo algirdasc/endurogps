@@ -2,9 +2,18 @@
 
 #include <WiFi.h>
 #include <WebServer.h>
+#include <HTTPClient.h>
 #include <HTTPUpdate.h>
 
-#include "Translation.h"
+
+const char FIRMWARE_PAGE_BASE_URL[] PROGMEM = "/sdcard";
+const char FIRMWARE_PAGE_TITLE[] PROGMEM = "Firmware update";
+const char FIRMWARE_PAGE_SUBTITLE[] PROGMEM = "Current version: " FIRMWARE;
+const char FIRMWARE_PAGE_SUBMIT[] PROGMEM = "Update to latest version";
+const char FIRMWARE_PAGE_NEWEST_VERSION[] PROGMEM = "You have newest firmware version";
+const char FIRMWARE_PAGE_UPDATE_SUCCESS[] PROGMEM = "Update was successful!";
+const char FIRMWARE_PAGE_UPDATE_FAILED[] PROGMEM = "Error downloading update: (%d) %s";
+
 
 class SettingsFirmwareHandler : public RequestHandler
 {
@@ -26,7 +35,7 @@ class SettingsFirmwareHandler : public RequestHandler
 
             htmlOutput += HTML::formEnd(FIRMWARE_PAGE_SUBMIT);
 
-            server.send(200, contentTypeHtml, 
+            server.send(HTTP_CODE_OK, contentTypeHtml, 
                 Template::generateBody(htmlOutput, FIRMWARE_PAGE_TITLE, FIRMWARE_PAGE_SUBTITLE)
             );
 
@@ -42,27 +51,22 @@ class SettingsFirmwareHandler : public RequestHandler
             httpUpdate.setLedPin(LED_BUILTIN);
             t_httpUpdate_return ret = httpUpdate.update(client, UPDATE_FILE_URL);
 
+            char message[128];
             switch (ret) {
                 case HTTP_UPDATE_FAILED:
-                    {
-                        char errorMessage[128];
-                        sprintf(errorMessage, "Error downloading update: (%d) %s", httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str());
-                        server.send(200, contentTypeHtml, 
-                            Template::generateBody(errorMessage, FIRMWARE_PAGE_TITLE, FIRMWARE_PAGE_SUBTITLE)
-                        );
-                    }
+                    sprintf(message, FIRMWARE_PAGE_UPDATE_FAILED, httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str());
                     break;
                 case HTTP_UPDATE_NO_UPDATES:
-                    server.send(200, contentTypeHtml,
-                        Template::generateBody(FIRMWARE_PAGE_NEWEST_VERSION, FIRMWARE_PAGE_TITLE, FIRMWARE_PAGE_SUBTITLE)
-                    );
+                    sprintf(message, FIRMWARE_PAGE_NEWEST_VERSION);
                     break;
                 case HTTP_UPDATE_OK:
-                    server.send(200, contentTypeHtml,
-                        Template::generateBody(FIRMWARE_PAGE_UPDATE_SUCCESS, FIRMWARE_PAGE_TITLE, FIRMWARE_PAGE_SUBTITLE)
-                    );
+                    sprintf(message, FIRMWARE_PAGE_UPDATE_SUCCESS);
                     break;
             }
+
+            server.send(HTTP_CODE_OK, contentTypeHtml,
+                Template::generateBody(message, FIRMWARE_PAGE_TITLE, FIRMWARE_PAGE_SUBTITLE)
+            );
 
             return true;
         }

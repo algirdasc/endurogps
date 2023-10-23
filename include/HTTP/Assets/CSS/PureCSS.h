@@ -1,5 +1,6 @@
-/* Auto generated with generate_css.sh, do not modify */
-const char PURE_CSS[] PROGMEM = R"raw(/*!
+#pragma once
+
+const char CSS_PURECSS[] PROGMEM = R"raw(/*!
 Pure v3.0.0
 Copyright 2013 Yahoo!
 Licensed under the BSD License.

@@ -1,9 +1,10 @@
 #pragma once
 
+#include <HTTPClient.h>
 #include <WebServer.h>
 #include "HTTP/Template.h"
-#include "HTTP/Assets/Style.h"
-#include "HTTP/Assets/PureCSS.h"
+#include "HTTP/Assets/CSS/Style.h"
+#include "HTTP/Assets/CSS/PureCSS.h"
 
 class AssetHandler : public RequestHandler
 {
@@ -18,11 +19,11 @@ class AssetHandler : public RequestHandler
             server.sendHeader("Cache-Control", "max-age=86400");
 
             if (requestUri == "/pure-css.css") {
-                server.send_P(200, contentTypeCss, PURE_CSS);
+                server.send_P(HTTP_CODE_OK, contentTypeCss, CSS_PURECSS);
             }
 
             if (requestUri == "/style.css") {
-                server.send_P(200, contentTypeCss, STYLE_CSS);
+                server.send_P(HTTP_CODE_OK, contentTypeCss, CSS_STYLE);
             }
 
             return true;

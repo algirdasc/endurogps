@@ -2,13 +2,44 @@
 
 #include <SD.h>
 #include <WebServer.h>
+#include <HTTPClient.h>
 
-#include "Translation.h"
 #include "HTTP/URL.h"
 #include "HTTP/Template.h"
 
+
+const char FILEBROWSER_PAGE_BASE_URL[] PROGMEM = "/sdcard";
+const char FILEBROWSER_PAGE_TITLE[] PROGMEM = "File browser";
+const char FILEBROWSER_PAGE_404_ERROR[] PROGMEM = "SD Card is unavailable or path does not exist";
+const char FILEBROWSER_PAGE_TABLE_HEADER_TEMPLATE[] PROGMEM = R"raw(
+    <table class="pure-table pure-table-horizontal pure-table-stretch">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Filename</th>
+                <th>Size</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+)raw";
+const char FILEBROWSER_PAGE_TABLE_FOOTER_TEMPLATE[] PROGMEM = R"raw(
+        </tbody>
+    </table>
+    </div></div>
+)raw";
+const char FILEBROWSER_PAGE_DIRECTORY_EMPTY_ROW[] PROGMEM = R"raw(
+    <tr>
+        <td class="text-center" colspan="100">
+            Directory is empty
+        </td>
+    </tr>
+)raw";
+
+
 class FileBrowserHandler : public RequestHandler
 {
+
     public:
         bool canHandle(HTTPMethod requestMethod, String requestUri)
         {
@@ -24,7 +55,7 @@ class FileBrowserHandler : public RequestHandler
             }
 
             if (!SD.exists(sdCardPath)) {
-                server.send(404, contentTypeHtml, 
+                server.send(HTTP_CODE_NOT_FOUND, contentTypeHtml, 
                     Template::generateBody("", FILEBROWSER_PAGE_TITLE, FILEBROWSER_PAGE_404_ERROR)
                 );
 
@@ -41,7 +72,7 @@ class FileBrowserHandler : public RequestHandler
             }
 
             if (entry.isDirectory()) {
-                server.send(200, contentTypeHtml, 
+                server.send(HTTP_CODE_OK, contentTypeHtml, 
                     Template::generateBody(directoryHtmlTable(entry), FILEBROWSER_PAGE_TITLE, entry.path())
                 );
             } else {
@@ -106,7 +137,7 @@ class FileBrowserHandler : public RequestHandler
                 File entry = dir.openNextFile();
                 if (!entry) {
                     if (fileCount == 0) {
-                        table += FILEBROWSER_PAGE_DIRECTORY_EMPTY_ROW
+                        table += FILEBROWSER_PAGE_DIRECTORY_EMPTY_ROW;
                     }
 
                     break;                    
@@ -141,7 +172,7 @@ class FileBrowserHandler : public RequestHandler
                 entry.close();                        
             }
 
-            table += "</tbody></table></div></div>";
+            table += FILEBROWSER_PAGE_TABLE_FOOTER_TEMPLATE;
 
             return table;
         }

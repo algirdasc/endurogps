@@ -28,6 +28,7 @@
         "type_traits": "cpp",
         "tuple": "cpp",
         "cstdlib": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "system_error": "cpp"
     }
 }

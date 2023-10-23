@@ -1,13 +1,14 @@
 #pragma once
 
 #include <Arduino.h>
+#include "HTTP/Assets/HTML/Snippets.h"
 
 class HTML
 {
     public:
         static String formStart()
         {
-            String form = R"raw(<form class="pure-form pure-form-stacked" method="POST">)raw";
+            String form = SNIPPET_FORM_START;
 
             return form;
         }
@@ -45,6 +46,23 @@ class HTML
         }
 
         static String select(String label, String name, String values[], String labels[], int options = 0, String selected = "")
+        {
+            String select = ""
+                "<label for=\"select_" + name + "\">" + label + "</label>"
+                "<select class=\"pure-input-1\" id=\"select_" + name + "\" name=\"" + name + "\">";
+
+            for (int i = 0; i < options; i++) {                
+                select += "<option value=\"" + values[i] + "\"" + (values[i] == selected ? "selected" : "") + ">";
+                select += labels[i];
+                select += "</option>";
+            }
+
+            select += "</select>";
+
+            return select;
+        }
+
+        static String select2(String label, String name, String values[], const char *labels[], int options = 0, String selected = "")
         {
             String select = ""
                 "<label for=\"select_" + name + "\">" + label + "</label>"
