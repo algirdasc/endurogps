@@ -210,7 +210,7 @@
 // optionally, all the info for each satellite.
 //
 
-//#define NMEAGPS_PARSE_SATELLITES
+#define NMEAGPS_PARSE_SATELLITES
 //#define NMEAGPS_PARSE_SATELLITE_INFO
 
 #ifdef NMEAGPS_PARSE_SATELLITES
@@ -231,7 +231,7 @@
 // Enable/disable gathering interface statistics:
 // CRC errors and number of sentences received
 
-#define NMEAGPS_STATS
+// #define NMEAGPS_STATS
 
 //------------------------------------------------------
 // Configuration item for allowing derived types of NMEAGPS.

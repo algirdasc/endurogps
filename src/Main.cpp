@@ -248,7 +248,7 @@ void setup()
 
     statusLed.off();
 
-    // startRecording();
+    startRecording();
 
     // Dump information
     // log_d("Battery voltage: %.2f V", battery.voltage());

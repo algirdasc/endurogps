@@ -61,8 +61,8 @@ void TrackAddictCSVFormatter::writeHeader(File file)
     // U1 - Units (U1 - kph, U0 - mph)
 
     file.println("# RaceRender Data: EnduroGPS (Mode -1)");
-    file.println("# GPS: EXT: ENDUROGPS; MODE: BT");
+    file.println("# GPS: EXT: ENDUROGPS; MODE: SD");
     file.println("# User Settings: SL1;U1;AS1;LT0/1;EC0;VC-1;VQ3;VS0;VSOIS0;VIF1");
     file.println("# Device Free Space: 56569 MB");
-    file.println(R"raw("Time","UTC Time","GPS_Update","GPS_Delay","Latitude","Longitude","Altitude (m)","Altitude (ft)","Speed (Km/h)","Heading","Accuracy (m)","Accel X","Accel Y","Accel Z","Brake (calculated)","Barometric Pressure (kPa)","Pressure Altitude (m)","Valid?")raw");
+    file.println(R"raw("Time","UTC Time","GPS_Update","GPS_Delay","Latitude","Longitude","Altitude (m)","Altitude (ft)","Speed (Km/h)","Heading","Accuracy (m)")raw");
 }
