@@ -1,10 +1,14 @@
 #include "GPS/GPSPort.h"
 
-void GPSPort::initialize()
-{    
+GPSPort::GPSPort()
+{
     GPSSerial.begin(GPS_BAUD_RATE, SERIAL_8N1, GPIO_GPS_RX, GPIO_GPS_TX);
+    GPSSerial.setTimeout(GPS_UART_TIMEOUT);
+}
 
-    pushMessage(UBLOX_WARMSTART);
+void GPSPort::initialize()
+{           
+    pushMessage(UBLOX_WARMSTART, sizeof(UBLOX_WARMSTART));
 
     GPSSerial.flush();
     delay(250);
@@ -22,9 +26,11 @@ void GPSPort::initialize()
         // TODO: enable pulsing error on the LED to signal the user that something is bad
         GPSSerial.begin(GPS_BAUD_RATE, SERIAL_8N1, GPIO_GPS_RX, GPIO_GPS_TX);
     }
+
+    isInitalized = true;
 }
 
-void GPSPort::pushMessage(const char message[])
+void GPSPort::pushMessage(const char message[], uint size)
 {
     // if (gps_powersave)
     // {
@@ -36,9 +42,7 @@ void GPSPort::pushMessage(const char message[])
     //     gps_initialize_settings();
     // }
 
-    uint messageSize = sizeof(message);
-
-    for (uint i = 0; i < messageSize; i++) {
+    for (uint i = 0; i < size; i++) {
         GPSSerial.write(message[i]);
     }
 }
@@ -47,22 +51,21 @@ void GPSPort::setBaudrate(uint32_t baudRate)
 {
     switch (baudRate) {
         case 38400:
-            pushMessage(UBLOX_BAUD_38400);
+            pushMessage(UBLOX_BAUD_38400, sizeof(UBLOX_BAUD_38400));
             break;
         case 57600:
-            pushMessage(UBLOX_BAUD_57600);
+            pushMessage(UBLOX_BAUD_57600, sizeof(UBLOX_BAUD_57600));
             break;
         case 115200:
-            pushMessage(UBLOX_BAUD_115200);
+            pushMessage(UBLOX_BAUD_115200, sizeof(UBLOX_BAUD_115200));
             break;
         default:
-            pushMessage(UBLOX_BAUD_38400);
+            pushMessage(UBLOX_BAUD_38400, sizeof(UBLOX_BAUD_38400));
             break;
     }
 
     GPSSerial.flush();
     delay(500);
-    log_d("Changing baud on UART2 from %u to %u", GPSSerial.baudRate(), baudRate);
 
     GPSSerial.updateBaudRate(baudRate);
 }
@@ -71,71 +74,61 @@ void GPSPort::setRate(uint rate)
 {
     switch (rate) {
         case 1:
-            pushMessage(UBLOX_INIT_1HZ);
+            pushMessage(UBLOX_INIT_1HZ, sizeof(UBLOX_INIT_1HZ));
             break;
         case 5:
-            pushMessage(UBLOX_INIT_5HZ);
+            pushMessage(UBLOX_INIT_5HZ, sizeof(UBLOX_INIT_5HZ));
             break;
         case 10:
-            pushMessage(UBLOX_INIT_10HZ);
-            break;
-        default:
-            log_e("Invalid GPS rate %d", rate);
+            pushMessage(UBLOX_INIT_10HZ, sizeof(UBLOX_INIT_10HZ));
             break;
     }
-
-    log_d("GPS rate set %dHz", rate);
 }
 
 void GPSPort::powerOff()
 {
-    pushMessage(UBLOX_PWR_OFF);
+    if (!isInitalized) {
+        return;
+    }
+
+    pushMessage(UBLOX_PWR_OFF, sizeof(UBLOX_PWR_OFF));
+    isInitalized = false;
 }
 
 void GPSPort::setGSV(bool enabled)
 {
-    log_d("GSV switched to %d", enabled);
-    enabled ? pushMessage(UBLOX_GxGSV_ON) : pushMessage(UBLOX_GxGSV_OFF);
+    enabled ? pushMessage(UBLOX_GxGSV_ON, sizeof(UBLOX_GxGSV_ON)) : pushMessage(UBLOX_GxGSV_OFF, sizeof(UBLOX_GxGSV_OFF));
 }
 
 void GPSPort::setGSA(bool enabled)
 {
-    log_d("GSA switched to %d", enabled);
-    enabled ? pushMessage(UBLOX_GxGSA_ON) : pushMessage(UBLOX_GxGSA_OFF);
+    enabled ? pushMessage(UBLOX_GxGSA_ON, sizeof(UBLOX_GxGSA_ON)) : pushMessage(UBLOX_GxGSA_OFF, sizeof(UBLOX_GxGSA_OFF));
 }
 
 void GPSPort::setGBS(bool enabled)
 {
-    log_d("GBS switched to %d", enabled);
-    enabled ? pushMessage(UBLOX_GxGBS_ON) : pushMessage(UBLOX_GxGBS_OFF);
+    enabled ? pushMessage(UBLOX_GxGBS_ON, sizeof(UBLOX_GxGBS_ON)) : pushMessage(UBLOX_GxGBS_OFF, sizeof(UBLOX_GxGBS_OFF));
 }
 
 void GPSPort::setGLL(bool enabled)
 {
-    log_d("GLL switched to %d", enabled);
-    enabled ? pushMessage(UBLOX_GxGLL_ON) : pushMessage(UBLOX_GxGLL_OFF);
+    enabled ? pushMessage(UBLOX_GxGLL_ON, sizeof(UBLOX_GxGLL_ON)) : pushMessage(UBLOX_GxGLL_OFF, sizeof(UBLOX_GxGLL_OFF));
 }
 
 void GPSPort::setVTG(bool enabled)
 {
-    log_d("VTG switched to %d", enabled);
-    enabled ? pushMessage(UBLOX_GxVTG_ON) : pushMessage(UBLOX_GxVTG_OFF);
+    enabled ? pushMessage(UBLOX_GxVTG_ON, sizeof(UBLOX_GxVTG_ON)) : pushMessage(UBLOX_GxVTG_OFF, sizeof(UBLOX_GxVTG_OFF));
 }
 
 void GPSPort::setMainTalker(uint talkerID)
 {
     switch (talkerID) {
         case GPSPORT_MAINTALKER_GP:
-            log_d("TalkedID switched to GP");
-            pushMessage(UBLOX_INIT_MAINTALKER_GP);
+            pushMessage(UBLOX_INIT_MAINTALKER_GP, sizeof(UBLOX_INIT_MAINTALKER_GP));
             break;
         case GPSPORT_MAINTALKER_GP_GPSONLY:
-            log_d("TalkedID switched to GPSONLY");
-            pushMessage(UBLOX_INIT_MAINTALKER_GP_GPSONLY);
+            pushMessage(UBLOX_INIT_MAINTALKER_GP_GPSONLY, sizeof(UBLOX_INIT_MAINTALKER_GP_GPSONLY));
             break;            
-        default:
-            log_e("Invalid talkerID %d provided", talkerID);
-            break;
     }    
 }
 
@@ -143,15 +136,10 @@ void GPSPort::setPowerSave(uint timeS)
 {
     switch (timeS) {
         case 1800:
-            log_d("PowerSave switched to 1800");
-            pushMessage(UBLOX_PWR_SAVE_30MIN);
+            pushMessage(UBLOX_PWR_SAVE_30MIN, sizeof(UBLOX_PWR_SAVE_30MIN));
             break;
         case 3600:
-            log_d("PowerSave switched to 3600");
-            pushMessage(UBLOX_PWR_SAVE_1HR);
-            break;
-        default:
-            log_e("Invalid power save time %d provided", timeS);
+            pushMessage(UBLOX_PWR_SAVE_1HR, sizeof(UBLOX_PWR_SAVE_1HR));
             break;
     }
 }
@@ -160,12 +148,10 @@ void GPSPort::setSVChannels(uint channels)
 {
     switch (channels) {
         case 8:
-            pushMessage(UBLOX_INIT_CHANNEL_8);
+            pushMessage(UBLOX_INIT_CHANNEL_8, sizeof(UBLOX_INIT_CHANNEL_8));
             break;
         default:
-            pushMessage(UBLOX_INIT_CHANNEL_ALL);
+            pushMessage(UBLOX_INIT_CHANNEL_ALL, sizeof(UBLOX_INIT_CHANNEL_ALL));
             break;
     }
-
-    log_d("SV channels switched to %d", channels);
 }

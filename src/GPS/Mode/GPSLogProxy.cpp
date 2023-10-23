@@ -16,9 +16,6 @@ void GPSLogProxy::formatter(uint formatter)
         case LOG_FORMAT_VOB:
             logFormatter = new VOBFormatter();
             break;
-        default:
-            log_e("Unknown formatter provided");
-            break;
     }
 }
 
@@ -34,18 +31,35 @@ void GPSLogProxy::stop()
     logFile.close();
 }
 
-void GPSLogProxy::handleLoop()
+void GPSLogProxy::handle(char *data, size_t size)
 {
     if (!isStarted) {
         return;
     }
 
-    while (nmeaGps.available(GPSSerial)) {        
-        trace_all(SerialMonitor, nmeaGps, nmeaGps.read());
+    nmeaGps.available();
 
-        // if (!logFormatter->write(logFile, gpsFix)) {
-        //     stop();
-        //     log_e("Failed to write GPS data");
-        // }
+    uint8_t gpsData[GPS_MAX_BUFFER_SIZE];
+    for (uint i = 0; i < size; i++) {
+        nmeaGps.handle((uint8_t) data[i]);
     }
+
+    if (nmeaGps.available()) {
+        gpsFix = nmeaGps.read();
+        trace_all(SerialMonitor, nmeaGps, gpsFix);
+        if (!logFormatter->write(logFile, gpsFix)) {
+            stop();
+            log_e("Failed to write GPS data");
+        }
+    }   
+
+    if (nmeaGps.overrun()) {
+        nmeaGps.overrun(false);
+        log_e("Too much data");
+    } 
+
+    // if (!logFormatter->write(logFile, gpsFix)) {
+    //     stop();
+    //     log_e("Failed to write GPS data");
+    // }
 }

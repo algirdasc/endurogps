@@ -2,8 +2,8 @@
 
 #include <SD.h>
 #include <WebServer.h>
-#include <HTTPClient.h>
 
+#include "HTTP/HTTPCodes.h"
 #include "HTTP/URL.h"
 #include "HTTP/Template.h"
 

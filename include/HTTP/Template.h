@@ -4,6 +4,7 @@
 #include "EnduroGPS.h"
 #include "Battery.h"
 #include "WebServer.h"
+#include "HTTP/HTTPCodes.h"
 #include "HTTP/Assets/HTML/Header.h"
 #include "HTTP/Assets/HTML/Footer.h"
 
@@ -44,7 +45,7 @@ class Template
         static void redirect(WebServer &server, String uri)
         {
             server.sendHeader("Location", uri);
-            server.send(302, contentTypeHtml, 
+            server.send(HTTP_CODE_REDIRECT, contentTypeHtml, 
                 Template::generateBody("<div class=\"text-center\">Redirecting to <a href=\"" + uri + "\">" + uri + "</a></div>")
             );
         }

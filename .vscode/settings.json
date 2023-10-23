@@ -29,6 +29,7 @@
         "tuple": "cpp",
         "cstdlib": "cpp",
         "filesystem": "cpp",
-        "system_error": "cpp"
+        "system_error": "cpp",
+        "utility": "cpp"
     }
 }

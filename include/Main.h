@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <EasyButton.h>
 #include <TaskScheduler.h>
+#include <AsyncTCP.h>
 
 #include "EnduroGPS.h"
 #include "HTTP/Template.h"
@@ -10,7 +11,6 @@
 #include "WifiMode.h"
 #include "LED.h"
 #include "SDCard.h"
-#include "NMEAServer.h"
 #include "GPS/GPSPort.h"
 #include "GPS/Mode/GPSLogProxy.h"
 #include "GPS/Mode/GPSBLEProxy.h"

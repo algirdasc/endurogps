@@ -6,9 +6,9 @@ void Params::save()
 {
     preferences.begin(T_PREFERENCES_NS);
 
-    preferences.putString("wifiMode", Params::wifiMode(storage.wifiMode));
-    preferences.putString("wifiStaSsid", storage.wifiStaSsid);
-    preferences.putString("wifiStaPass", storage.wifiStaPass);    
+    preferences.putString(PARAM_WIFI_MODE, Params::wifiMode(storage.wifiMode));
+    preferences.putString(PARAM_WIFI_STA_SSID, storage.wifiStaSsid);
+    preferences.putString(PARAM_WIFI_STA_PASS, storage.wifiStaPass);    
 
     preferences.putUInt(GPS_MODE, storage.gpsMode);
     preferences.putUInt(GPS_RATE_HZ, storage.gpsRateHz);
@@ -33,9 +33,9 @@ void Params::load()
 {
     preferences.begin(T_PREFERENCES_NS);
 
-    storage.wifiMode = Params::wifiMode(preferences.getString("wifiMode"));
-    storage.wifiStaPass = preferences.getString("wifiStaPass");
-    storage.wifiStaSsid = preferences.getString("wifiStaSsid");
+    storage.wifiMode = Params::wifiMode(preferences.getString(PARAM_WIFI_MODE));
+    storage.wifiStaPass = preferences.getString(PARAM_WIFI_STA_PASS);
+    storage.wifiStaSsid = preferences.getString(PARAM_WIFI_STA_SSID);
 
     storage.logFormat = preferences.getUInt(GPS_LOG_FORMAT, LOG_FORMAT_TRACK_ADDICT_CSV);
 

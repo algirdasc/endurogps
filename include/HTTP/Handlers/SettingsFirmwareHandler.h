@@ -2,11 +2,11 @@
 
 #include <WiFi.h>
 #include <WebServer.h>
-#include <HTTPClient.h>
 #include <HTTPUpdate.h>
 
+#include "HTTP/HTTPCodes.h"
 
-const char FIRMWARE_PAGE_BASE_URL[] PROGMEM = "/sdcard";
+const char FIRMWARE_PAGE_BASE_URL[] PROGMEM = "/settings/firmware";
 const char FIRMWARE_PAGE_TITLE[] PROGMEM = "Firmware update";
 const char FIRMWARE_PAGE_SUBTITLE[] PROGMEM = "Current version: " FIRMWARE;
 const char FIRMWARE_PAGE_SUBMIT[] PROGMEM = "Update to latest version";

@@ -1,5 +1,4 @@
 #include "Main.h"
-#include <WiFiServer.h>
 
 bool isRecording = false;
 
@@ -8,14 +7,15 @@ WifiMode wifiMode;
 EasyButton button(GPIO_BUTTON);
 LED statusLed(LED_BUILTIN);
 SDCard sdCard;
-NMEAServer nmeaServer;
+AsyncServer *server = new AsyncServer(NMEA_PORT);
 GPSPort gpsPort;
 Params params;
 Battery battery;
 HTTP http;
 GPSBLEProxy gpsBLEProxy;
 GPSLogProxy gpsLogProxy;
-WiFiServer testServer(11188);
+
+static std::vector<AsyncClient*> NMEAClients;
 
 void ledBlink()
 {
@@ -34,7 +34,7 @@ void gpsInitialize()
     gpsPort.setVTG(params.storage.nmeaVTG);
     gpsPort.setMainTalker(params.storage.nmeaMainTalker);
     gpsPort.setSVChannels(params.storage.nmeaSVChannels);
-    gpsPort.setPowerSave(params.storage.gpsPowerSave);
+    // gpsPort.setPowerSave(params.storage.gpsPowerSave);
 }
 
 void startRecording()
@@ -42,10 +42,12 @@ void startRecording()
     gpsInitialize();    
 
     switch (params.storage.gpsMode) {
-        case GPS_MODE_BLE:
+        case GPS_MODE_BT:
+            log_d("Starting ble logger");
             gpsBLEProxy.start();
             break;
-        case GPS_MODE_CSV:        
+        case GPS_MODE_CSV:
+            log_d("Starting csv logger");
             gpsLogProxy.formatter(params.storage.logFormat);
             gpsLogProxy.start();
             break;
@@ -56,8 +58,8 @@ void startRecording()
 
 void stopRecording()
 {
-    // gpsBLEProxy.stop();
-    // gpsLogProxy.stop();
+    gpsBLEProxy.stop();
+    gpsLogProxy.stop();
     gpsPort.powerOff();
 
     isRecording = false;
@@ -65,8 +67,7 @@ void stopRecording()
 
 void powerOff()
 {
-    // TODO: redirect somewhere
-    Template::redirect(http.server, "/device/please_wait");
+    Template::redirect(http.server, PLEASE_WAIT_PAGE_BASE_URL);
 
     stopRecording();
 
@@ -88,7 +89,7 @@ void powerOff()
 
 void restart()
 {
-    Template::redirect(http.server, "/device/please_wait");
+    Template::redirect(http.server, PLEASE_WAIT_PAGE_BASE_URL);
 
     esp_restart();
 }
@@ -98,24 +99,114 @@ void buttonPressOneSec()
     isRecording ? stopRecording() : startRecording();
 }
 
+void buttonPressTenSec() 
+{
+    powerOff();
+}
+
+void bluetoothDisable()
+{
+    esp_bt_controller_disable();
+}
+
+static void NMEAClientReply(char *data, size_t size)
+{    
+    for (uint i = 0; i < NMEAClients.size(); i++) {
+        if (NMEAClients[i]->space() > size && NMEAClients[i]->canSend()) {
+            NMEAClients[i]->write(data, size);
+        }
+    }
+}
+
+static void NMEAHandleClientData(void* arg, AsyncClient *client, void *data, size_t len) 
+{
+    Serial.printf("\n data received from client %s \n", client->remoteIP().toString().c_str());
+	Serial.write((uint8_t*) data, len);
+
+    GPSSerial.write((uint8_t*) data, len);
+}
+
+static void NMEAHandleClientDisconnect(void* arg, AsyncClient* client)
+{
+    for (uint i = 0; i < NMEAClients.size(); i++) {
+        if (NMEAClients[i]->disconnected()) {
+            NMEAClients.erase(NMEAClients.begin() + i);
+        }
+    }
+}
+
+static void NMEAHandleClient(void* arg, AsyncClient* client)
+{
+    NMEAClients.push_back(client);
+
+    client->onData(&NMEAHandleClientData, NULL);
+    client->onDisconnect(&NMEAHandleClientDisconnect, NULL);
+}
+
+void NMEAServerStart()
+{
+    server->onClient(&NMEAHandleClient, server);
+    server->begin();
+    server->setNoDelay(true);
+}
+
+void NMEAServerStop() 
+{
+    server->end();
+}
+
+void handleGPSPort()
+{
+    size_t len = GPSSerial.available();
+    if (!len) {
+        return;
+    }
+
+    uint8_t buf[len];
+    GPSSerial.readBytes(buf, len);
+
+    if (server->status() == 1) {
+        NMEAClientReply((char *) buf, len);
+    }
+
+    switch (params.storage.gpsMode) {
+        case GPS_MODE_BT:
+            break;
+        case GPS_MODE_CSV:
+            gpsLogProxy.handle((char *) buf, len);
+            break;
+    }  
+}
+
+void wifiSetMode(WiFiMode_t mode)
+{
+    wifiMode.mode(mode);
+
+    if (mode == WIFI_OFF) {
+        NMEAServerStop();
+        http.stop();
+    } else {
+        if (params.storage.nmeaTcpEnabled) {
+            NMEAServerStart();
+        }
+
+        http.start();
+    }    
+}
+
 void buttonPressFiveSec() 
 {
     switch (wifiMode.currentMode) {
         case WIFI_AP:
-            wifiMode.mode(WIFI_STA);
+            wifiSetMode(WIFI_STA);
             break;
         case WIFI_STA:
-            wifiMode.mode(WIFI_OFF);
+            wifiSetMode(WIFI_OFF);
             break;
         case WIFI_OFF:
-            wifiMode.mode(WIFI_AP);
+            wifiSetMode(WIFI_AP);
             break;
     }
-}
-
-void buttonPressTenSec() 
-{
-    powerOff();
 }
 
 void setup()
@@ -131,23 +222,19 @@ void setup()
     // Load parameters
     params.load();    
 
-    // Initialize sd card
-    //sdCard.start();
-    // TODO: check for firmware in SDCARD
+    // Set wifi credentials
+    wifiMode.setSTAcredentials(params.storage.wifiStaSsid, params.storage.wifiStaPass);
 
     // Start wifi & services
-    wifiMode.setSTAcredentials(params.storage.wifiStaSsid, params.storage.wifiStaPass);
-    wifiMode.mode(params.storage.wifiMode);
+    wifiSetMode(params.storage.wifiMode);
 
-    // Start webServer
-    // TODO: check if WIFI is up
     // Bind some web functions
-    http.on("/device/poweroff", powerOff);
-    http.on("/device/restart", restart);
-    http.start();
+    http.on(F("/device/poweroff"), powerOff);
+    http.on(F("/device/restart"), restart);
 
-    // NMEAServer
-    nmeaServer.start();
+    // TODO: remove?
+    http.on(F("/gps/start"), startRecording);
+    http.on(F("/gps/stop"), stopRecording);   
 
     // Button control
     button.begin();
@@ -157,7 +244,6 @@ void setup()
 
     // taskStatusLedBlink.setInterval(1000);
     // taskStatusLedBlink.disable();
-
 
     statusLed.off();
 
@@ -174,19 +260,12 @@ void setup()
 }
 
 void loop()
-{
-    switch (params.storage.gpsMode) {
-        case GPS_MODE_BLE:
-            break;
-        case GPS_MODE_CSV:
-            gpsLogProxy.handleLoop();
-            break;
-    }   
+{    
+    handleGPSPort();
 
-    http.handleClient();
-    nmeaServer.handleClient();
+    http.handleClient();    
 
     button.read();
 
-    ts.execute();    
+    ts.execute();
 }

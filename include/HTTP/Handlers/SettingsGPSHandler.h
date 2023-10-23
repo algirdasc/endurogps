@@ -1,10 +1,10 @@
 #pragma once
 
-#include <HTTPClient.h>
 #include <WebServer.h>
 
-#include "GPS/GPSPort.h"
 #include "Params.h"
+#include "GPS/GPSPort.h"
+#include "HTTP/HTTPCodes.h"
 
 
 const char GPS_PAGE_BASE_URL[] PROGMEM = "/settings/gps";
@@ -12,6 +12,7 @@ const char *GPS_PAGE_MODE_LABELS[] PROGMEM = {"Local (SDCard)", "Bluetooth"};
 const char *GPS_PAGE_LOG_FORMAT_LABELS[] PROGMEM = {"TrackAddict CSV", "VBO"};
 const char *GPS_PAGE_BAUD_RATE_VALUES[] PROGMEM = {"38400", "57600", "115200"};
 const char *GPS_PAGE_OPTIMIZE_FOR_LABELS[] PROGMEM = {"", "RaceTime", "RaceChrono", "TractAddict"};
+const char *GPS_PAGE_RATE_HZ_VALUES[] PROGMEM = {"1", "5", "10"};
 
 
 class SettingsGPSHandler : public RequestHandler
@@ -24,7 +25,6 @@ class SettingsGPSHandler : public RequestHandler
         String gpsBaudRateValues[3] = {"38400", "57600", "115200"};
 
         String gpsRateHzValues[3] = {"1", "5", "10"};
-        String gpsRateHzLabels[3] = {"1 Hz", "5 Hz", "10 Hz"};
 
         String gpsPowerSaveValues[2] = {"1800", "3600"};
         String gpsPowerSaveLabels[2] = {"30 minutes", "1 hour"};
@@ -68,7 +68,7 @@ class SettingsGPSHandler : public RequestHandler
             htmlOutput += R"raw(<fieldset><legend>GPS Receiver</legend><div class="pure-g">)raw";
             
             htmlOutput += R"raw(<div class="pure-u-1-3">)raw";
-            htmlOutput += HTML::select(F("GPS Refresh rate"), GPS_RATE_HZ, gpsRateHzValues, gpsRateHzLabels, 3, String(params.storage.gpsRateHz));
+            htmlOutput += HTML::select2(F("GPS Refresh rate"), GPS_RATE_HZ, gpsRateHzValues, GPS_PAGE_RATE_HZ_VALUES, 3, String(params.storage.gpsRateHz));
             htmlOutput += "</div>";
 
             htmlOutput += R"raw(<div class="pure-u-1-3">)raw";
@@ -99,19 +99,19 @@ class SettingsGPSHandler : public RequestHandler
             htmlOutput += "</div>";
 
             htmlOutput += R"raw(<div class="pure-u-1-5">)raw";
-            htmlOutput += HTML::checkbox("GxVTG", GPS_NMEA_VTG, params.storage.nmeaVTG);
+            htmlOutput += HTML::checkbox(F("GxVTG"), GPS_NMEA_VTG, params.storage.nmeaVTG);
             htmlOutput += "</div>";
 
             htmlOutput += R"raw(<div class="pure-u-1-2">)raw";
-            htmlOutput += HTML::select("Main Talker ID", GPS_NMEA_MAIN_TALKER, nmeaTalkertIDValues, nmeaTalkertIDLabels, 2, String(params.storage.nmeaMainTalker));
+            htmlOutput += HTML::select(F("Main Talker ID"), GPS_NMEA_MAIN_TALKER, nmeaTalkertIDValues, nmeaTalkertIDLabels, 2, String(params.storage.nmeaMainTalker));
             htmlOutput += "</div>";
 
             htmlOutput += R"raw(<div class="pure-u-1-2">)raw";
-            htmlOutput += HTML::select("SVs per Talker ID", GPS_NMEA_SV_CHANNELS, nmeaSVChannelsValues, nmeaSVChannelsLabels, 2, String(params.storage.nmeaSVChannels));
+            htmlOutput += HTML::select(F("SVs per Talker ID"), GPS_NMEA_SV_CHANNELS, nmeaSVChannelsValues, nmeaSVChannelsLabels, 2, String(params.storage.nmeaSVChannels));
             htmlOutput += "</div>";
 
             htmlOutput += R"raw(<div class="pure-u-1-1">)raw";
-            htmlOutput += HTML::checkbox("Enable NMEA TCP Server", GPS_NMEA_TCP_ENABLED, params.storage.nmeaTcpEnabled);
+            htmlOutput += HTML::checkbox(F("Enable NMEA TCP Server"), GPS_NMEA_TCP_ENABLED, params.storage.nmeaTcpEnabled);
             htmlOutput += "</div>";
 
             htmlOutput += "</div></fieldset>";
@@ -119,14 +119,14 @@ class SettingsGPSHandler : public RequestHandler
             htmlOutput += R"raw(<fieldset><legend>Presets</legend><div class="pure-g">)raw";
 
             htmlOutput += R"raw(<div class="pure-u-1-1">)raw";
-            htmlOutput += HTML::select2("Optimize settings for", "optimizeFor", nmeaOptimizeForValues, GPS_PAGE_OPTIMIZE_FOR_LABELS, 4);
+            htmlOutput += HTML::select2(F("Optimize settings for"), F("optimizeFor"), nmeaOptimizeForValues, GPS_PAGE_OPTIMIZE_FOR_LABELS, 4);
             htmlOutput += "</div>";
 
             htmlOutput += "</div></fieldset>";
 
             htmlOutput += HTML::formEnd();
 
-            server.send(HTTP_CODE_OK, contentTypeHtml, Template::generateBody(htmlOutput, "GPS Settings"));
+            server.send(HTTP_CODE_OK, contentTypeHtml, Template::generateBody(htmlOutput, F("GPS Settings")));
 
             return true;
         }

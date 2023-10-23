@@ -35,5 +35,5 @@ class GPSLogProxy
         void formatter(uint formatter);
         void start();
         void stop();
-        void handleLoop();
+        void handle(char *data, size_t size);
 };

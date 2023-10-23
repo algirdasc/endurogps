@@ -4,7 +4,7 @@
 #include <WiFi.h>
 
 #define GPS_MODE_CSV 0
-#define GPS_MODE_BLE 1
+#define GPS_MODE_BT 1
 
 #define LOG_FORMAT_TRACK_ADDICT_CSV 0
 #define LOG_FORMAT_VOB 1

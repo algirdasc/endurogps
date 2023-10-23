@@ -13,9 +13,14 @@
 
 class GPSPort
 {    
+    private:
+        bool isInitalized = false;
+
     public:
+        GPSPort();
+
         void initialize();
-        void pushMessage(const char message[]);
+        void pushMessage(const char message[], uint size);
         void powerOff();
         void setBaudrate(uint32_t baudRate);
         void setRate(uint rate);        

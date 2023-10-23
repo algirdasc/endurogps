@@ -1,8 +1,8 @@
 #pragma once
 
-#include <HTTPClient.h>
 #include <WebServer.h>
 #include "HTTP/Template.h"
+#include "HTTP/HTTPCodes.h"
 #include "HTTP/Assets/CSS/Style.h"
 #include "HTTP/Assets/CSS/PureCSS.h"
 

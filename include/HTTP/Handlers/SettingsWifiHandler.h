@@ -4,6 +4,7 @@
 #include <WebServer.h>
 
 #include "Params.h"
+#include "HTTP/HTTPCodes.h"
 
 
 const char WIFI_PAGE_BASE_URL[] PROGMEM = "/settings/wifi";
@@ -64,14 +65,14 @@ class SettingsWifiHandler : public RequestHandler
             htmlOutput += "</div>";
 
             htmlOutput += R"raw(<div class="pure-u-2-5">)raw";
-            htmlOutput += HTML::input(F("Password"), PARAM_WIFI_STA_PASS, params.storage.wifiStaPass, "password");
+            htmlOutput += HTML::input(F("Password"), PARAM_WIFI_STA_PASS, params.storage.wifiStaPass, F("password"));
             htmlOutput += "</div>";
 
             htmlOutput += "</div></fieldset>";
 
             htmlOutput += HTML::formEnd();
 
-            server.send(200, contentTypeHtml, Template::generateBody(htmlOutput, "Wireless"));
+            server.send(HTTP_CODE_OK, contentTypeHtml, Template::generateBody(htmlOutput, "Wireless"));
 
             return true;
         }
