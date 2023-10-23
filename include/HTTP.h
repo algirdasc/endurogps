@@ -4,7 +4,7 @@
 #include <WebServer.h>
 #include "EnduroGPS.h"
 
-const char PLEASE_WAIT_PAGE_BASE_URL[] PROGMEM = "/settings/wifi";
+const char PLEASE_WAIT_PAGE_BASE_URL[] PROGMEM = "/device/please_wait";
 
 typedef std::function<void(void)> THandlerFunction;
 class HTTP

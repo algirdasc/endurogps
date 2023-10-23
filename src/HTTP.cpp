@@ -49,11 +49,11 @@ void HTTP::notFound()
     );
 }
 
-void HTTP::redirect(String uri)
+void HTTP::redirect(String url)
 {
-    server.sendHeader("Location", uri);
+    server.sendHeader("Location", url);
     server.send(HTTP_CODE_REDIRECT, contentTypeHtml, 
-        Template::generateBody("<div class=\"text-center\">Redirecting to <a href=\"uri\">" + uri + "</a></div>")
+        Template::generateBody("<a href=\"" + url + "\">Redirect<a>")
     );
 }
 

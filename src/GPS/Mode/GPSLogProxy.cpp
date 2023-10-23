@@ -1,5 +1,4 @@
 #include "GPS/Mode/GPSLogProxy.h"
-#include "Streamers.h"
 
 GPSLogProxy::GPSLogProxy()
 {
@@ -57,7 +56,6 @@ void GPSLogProxy::handle(char *data, size_t size)
             fileCreated = true;
         }
 
-        trace_all(SerialMonitor, nmeaGps, gpsFix);
         if (!logFormatter->write(logFile, gpsFix)) {
             stop();
             log_e("Failed to write GPS data");

@@ -1,80 +1,71 @@
 #pragma once
 
 #include <Arduino.h>
-#include "HTTP/Assets/HTML/Snippets.h"
+
+const char HTML_SELECT_TAG_OPEN[] PROGMEM = R"raw(<label for="se_%s">%s</label><select class="pure-input-1" id="se_%s" name="%s">)raw";
+const char HTML_SELECT_OPTION_TAG[] PROGMEM = R"raw(<option value="%s"%s>%s</option>)raw";
+const char HTML_SELECT_TAG_CLOSE[] PROGMEM = "</select>";
+const char HTML_BUTTON_TAG[] PROGMEM = R"raw(<a href="%s" class="pure-button %s">%s</a>)raw";
+const char HTML_FORM_OPEN_TAG[] PROGMEM = R"raw(<form class="pure-form pure-form-stacked" method="POST">)raw";
+const char HTML_FORM_CLOSE_TAG[] PROGMEM = R"raw(<button type="submit" class="pure-button pure-button-primary">%s</button></form>)raw";
+const char HTML_CHECKBOX_TAG[] PROGMEM = R"raw(<label for="ch_%s" class="pure-checkbox"><input type="checkbox" id="ch_%s" name="%s" value="1" %s /> %s</label>)raw";
+const char HTML_INPUT_TAG[] PROGMEM = R"raw(<label for="in_%s">%s</label><input type="%s" maxlength="255" class="pure-input-1" id="in_%s" name="%s" value="%s" />)raw";
 
 class HTML
 {
     public:
         static String formStart()
         {
-            String form = SNIPPET_FORM_START;
-
-            return form;
+            return String(HTML_FORM_OPEN_TAG);
         }
 
-        static String formEnd(String submitText = "Submit")
+        static String formEnd(const char *submitText = "Submit")
         {
-            String form = R"raw(<button type="submit" class="pure-button pure-button-primary">)raw" + submitText + "</button></form>";
+            char buff[128];
+            sprintf(buff, HTML_FORM_CLOSE_TAG, submitText);
 
-            return form;
+            return String(buff);
         }
 
-        static String checkbox(String label, String name, bool checked)
+        static String checkbox(const char *label, const char *name, bool checked)
         {
-            String checkbox = ""
-                "<label for=\"chk_" + name + "\" class=\"pure-checkbox\">"
-                "<input type=\"checkbox\" id=\"chk_" + name + "\" name=\"" + name + "\" value=\"1\" " + (checked ? "checked" : "") + " /> " + label + "</label>";
+            char buff[256];
+            sprintf(buff, HTML_CHECKBOX_TAG, name, name, name, (checked ? "checked" : ""), label); 
 
-            return checkbox;
+            return String(buff);
         }
 
         static String input(String label, String name, String value = "", String type = "text")
         {
-            String input = ""
-                "<label for=\"input_" + name + "\">" + label + "</label>"
-                "<input type=\"" + type + "\" maxlength=\"255\" class=\"pure-input-1\" id=\"input_" + name + "\" name=\"" + name + "\" value=\"" + value + "\" />";
+            char buff[512];
+            sprintf(buff, HTML_INPUT_TAG, name, label, type, name, name, value);
 
-            return input;
+            return String(buff);
         }
 
         static String button(String label, String url, String cssClass = "")
         {
-            String input = "<a href=\"" + url + "\" class=\"pure-button " + cssClass + "\">" + label + "</a>";
+            char buff[128];
+            sprintf(buff, HTML_BUTTON_TAG, url, cssClass, label);
 
-            return input;
+            // TODO: use buff?
+            return String(buff);
         }
 
-        static String select(String label, String name, String values[], String labels[], int options = 0, String selected = "")
+        static String select(const char *label, const char *name, const char *values[], const char *labels[], int options = 0, String selected = "")
         {
-            String select = ""
-                "<label for=\"select_" + name + "\">" + label + "</label>"
-                "<select class=\"pure-input-1\" id=\"select_" + name + "\" name=\"" + name + "\">";
+            char buff[256];
+            sprintf(buff, HTML_SELECT_TAG_OPEN, name, label, name, name);
 
-            for (int i = 0; i < options; i++) {                
-                select += "<option value=\"" + values[i] + "\"" + (values[i] == selected ? "selected" : "") + ">";
-                select += labels[i];
-                select += "</option>";
+            String select = buff;
+
+            for (int i = 0; i < options; i++) {
+                char option[128];
+                sprintf(option, HTML_SELECT_OPTION_TAG, values[i], (String(values[i]).equalsIgnoreCase(selected) ? "selected" : ""), labels[i]);       
+                select += String(option);
             }
 
-            select += "</select>";
-
-            return select;
-        }
-
-        static String select2(String label, String name, String values[], const char *labels[], int options = 0, String selected = "")
-        {
-            String select = ""
-                "<label for=\"select_" + name + "\">" + label + "</label>"
-                "<select class=\"pure-input-1\" id=\"select_" + name + "\" name=\"" + name + "\">";
-
-            for (int i = 0; i < options; i++) {                
-                select += "<option value=\"" + values[i] + "\"" + (values[i] == selected ? "selected" : "") + ">";
-                select += labels[i];
-                select += "</option>";
-            }
-
-            select += "</select>";
+            select += HTML_SELECT_TAG_CLOSE;
 
             return select;
         }

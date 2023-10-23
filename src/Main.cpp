@@ -25,6 +25,8 @@ Task taskStatusLedBlink(0, TASK_FOREVER, &ledBlink, &ts, false);
 
 void gpsInitialize()
 {    
+    params.load();
+
     gpsPort.initialize();
     gpsPort.setRate(params.storage.gpsRateHz);
     gpsPort.setGSV(params.storage.nmeaGSV);
@@ -34,7 +36,6 @@ void gpsInitialize()
     gpsPort.setVTG(params.storage.nmeaVTG);
     gpsPort.setMainTalker(params.storage.nmeaMainTalker);
     gpsPort.setSVChannels(params.storage.nmeaSVChannels);
-    // gpsPort.setPowerSave(params.storage.gpsPowerSave);
 }
 
 void startRecording()
@@ -120,9 +121,6 @@ static void NMEAClientReply(char *data, size_t size)
 
 static void NMEAHandleClientData(void* arg, AsyncClient *client, void *data, size_t len) 
 {
-    Serial.printf("\n data received from client %s \n", client->remoteIP().toString().c_str());
-	Serial.write((uint8_t*) data, len);
-
     GPSSerial.write((uint8_t*) data, len);
 }
 
@@ -219,8 +217,11 @@ void setup()
     // SDCard start & check for updates
     sdCard.start();
 
+    // Turn of GPS after boot
+    gpsPort.powerOff();
+
     // Load parameters
-    params.load();    
+    params.load();
 
     // Set wifi credentials
     wifiMode.setSTAcredentials(params.storage.wifiStaSsid, params.storage.wifiStaPass);
@@ -247,7 +248,7 @@ void setup()
 
     statusLed.off();
 
-    startRecording();
+    // startRecording();
 
     // Dump information
     // log_d("Battery voltage: %.2f V", battery.voltage());

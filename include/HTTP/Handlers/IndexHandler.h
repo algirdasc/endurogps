@@ -5,9 +5,7 @@
 #include "HTTP/Template.h"
 #include "HTTP/HTTPCodes.h"
 
-const char INDEX_PAGE_TEMPLATE[] PROGMEM = 
-    "<a href='/settings'>Settings</a>\n"
-    "<a href='/sd/browse'>View files</a>\n";    
+const char INDEX_PAGE_TEMPLATE[] PROGMEM = "";
 
 class IndexHandler : public RequestHandler
 {
@@ -19,7 +17,9 @@ class IndexHandler : public RequestHandler
 
         bool handle(WebServer &server, HTTPMethod requestMethod, String requestUri)
         {
-            server.send(HTTP_CODE_OK, contentTypeHtml, Template::generateBody(INDEX_PAGE_TEMPLATE));
+            server.send(HTTP_CODE_OK, contentTypeHtml, 
+                Template::generateBody(INDEX_PAGE_TEMPLATE)
+            );
 
             return true;
         }

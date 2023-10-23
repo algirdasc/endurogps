@@ -153,8 +153,7 @@ class FileBrowserHandler : public RequestHandler
 
                 String entryAbsoluteUrl = absoluteUrl(entry.path());
                                 
-                table += "<tr>";
-                table += "<td>" + icon + "</td>";
+                table += "<tr><td>" + icon + "</td>";
                 table += "<td><a href=\"" + entryAbsoluteUrl + "\">";
                 table += entry.name();
                 table += "</a></td>";
@@ -164,10 +163,7 @@ class FileBrowserHandler : public RequestHandler
                 table += "</span></td>";
 
                 table += "<td class=\"text-center\"><a href=\"" + entryAbsoluteUrl + "?delete=1\" onclick=\"confirm('Are you sure you want to delete this item?');\">";
-                table += "<span class=\"icon delete\"></span>";
-                table += "</a></td>";
-
-                table += "</tr>";
+                table += "<span class=\"icon delete\"></span></a></td></tr>";
 
                 entry.close();                        
             }
