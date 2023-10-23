@@ -18,4 +18,8 @@ class BaseFormatter
 
             return timestamp.c_str();
         }
+        const float accuracy(gps_fix gpsFix)
+        {
+            return gpsFix.lat_err() > gpsFix.lon_err() ? gpsFix.lat_err() : gpsFix.lon_err();
+        }
 };

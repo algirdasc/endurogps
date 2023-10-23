@@ -26,14 +26,15 @@ bool VOBFormatter::write(File file, gps_fix gpsFix)
     float time = (millis() - startedAt) / 1000.0;
 
     char buffer[2048];
-    sprintf(buffer, "%i %s %.9f %.9f %.1f %.1f %.1f",
+    sprintf(buffer, "%i %s %.9f %.9f %.1f %.1f %.1f %.1f",
         gpsFix.satellites,                      // Satellites   %i
         ts(gpsFix, time),                       // UTC Time     %s
         gpsFix.latitudeL() / rescaleGPS,        // Latitude     %.9f
         gpsFix.longitudeL() / rescaleGPS,       // Longitude    %.9f
         gpsFix.speed_kph(),                     // Speed        %.1f
         gpsFix.heading(),                       // Heading      %.1f
-        gpsFix.altitude()                       // Altitude     %.1f
+        gpsFix.altitude(),                      // Altitude     %.1f
+        accuracy(gpsFix)                        // Accuracy     %.1f
     );
 
     Serial.println(buffer);
@@ -62,12 +63,13 @@ void VOBFormatter::writeHeader(File file)
     file.println("Velocity (kph)");
     file.println("Heading");
     file.println("Altitude (m)");
+    file.println("Accuracy (m)");
     file.println("");
     file.println("[comments]");
     file.println("Log rate: ");
     file.println("");    
     file.println("[column names]");
-    file.println("sats time lat long velocity heading PressureAltitude(m)");
+    file.println("sats time lat long velocity heading PressureAltitude(m) accuracy");
     file.println("");
     file.println("[data]");
 }

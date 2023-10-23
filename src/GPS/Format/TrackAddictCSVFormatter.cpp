@@ -34,7 +34,7 @@ bool TrackAddictCSVFormatter::write(File file, gps_fix gpsFix)
     float time = (millis() - startedAt) / 1000.0;
 
     char buffer[2048];
-    sprintf(buffer, "%.3f,%s,%i,%.3f,%.9f,%.9f,%.1f,%i,%.1f,%.1f,%.1f,%.2f,%.2f,%.2f,%i,%.2f,%.1f,%i",
+    sprintf(buffer, "%.3f,%s,%i,%.3f,%.9f,%.9f,%.1f,%i,%.1f,%.1f,%.1f",
         time,                               // Time                     %.3f
         ts(gpsFix, time),                   // UTC Time                 %s
         1,                                  // GPS Update               %i
@@ -45,14 +45,7 @@ bool TrackAddictCSVFormatter::write(File file, gps_fix gpsFix)
         (uint) gpsFix.altitude_ft(),        // Altitude (ft)            %i
         gpsFix.speed_kph(),                 // Speed km/h               %.1f
         gpsFix.heading(),                   // Heading                  %.1f
-        1.0,                                // Accuracy (m)             %.1f
-        0.1,                                // Accel X                  %.2f
-        0.2,                                // Accel Y                  %.2f
-        0.3,                                // Accel Z                  %.2f
-        0,                                  // Brake (calculated)       %i
-        0.0,                                // Barometric pressure      %.2f
-        0.0,                                // Pressure altitude (m)    %.1f
-        gpsFix.valid.location               // Valid?                  %i 
+        accuracy(gpsFix)                    // Accuracy (m)             %.1f
     );
 
     Serial.println(buffer);    
@@ -64,6 +57,9 @@ bool TrackAddictCSVFormatter::write(File file, gps_fix gpsFix)
 
 void TrackAddictCSVFormatter::writeHeader(File file)
 {
+    // User settings:
+    // U1 - Units (U1 - kph, U0 - mph)
+
     file.println("# RaceRender Data: EnduroGPS (Mode -1)");
     file.println("# GPS: EXT: ENDUROGPS; MODE: BT");
     file.println("# User Settings: SL1;U1;AS1;LT0/1;EC0;VC-1;VQ3;VS0;VSOIS0;VIF1");
