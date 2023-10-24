@@ -7,12 +7,12 @@
 
 WifiMode::WifiMode() {
   uint16_t chip = (uint16_t)((uint64_t) ESP.getEfuseMac() >> 32);
-  sprintf(accessPointSSID, "%s-%04X", WIFI_AP_SSID, chip);
+  sprintf(accessPointSSID, "%s-%04X", DEVICE_NAME, chip);
 
   WiFi.setHostname(WIFI_AP_MDNS);
 }
 
-void WifiMode::mode(WiFiMode_t mode)
+void WifiMode::setMode(WiFiMode_t mode)
 {
     if (mode == WIFI_STA) {                
         WifiMode::STA();
@@ -52,8 +52,6 @@ void WifiMode::AP()
     WiFi.softAPConfig(ip, ip, netMask);
 
     IPAddress currentIP = WiFi.softAPIP();
-
-    isConnected = true;
 }
 
 void WifiMode::STA() 
@@ -61,32 +59,28 @@ void WifiMode::STA()
     currentMode = WIFI_STA;
 
     WiFi.mode(WIFI_STA);
-    WiFi.begin(STASsid, STAKey);
-    log_d("Connecting to %s", STASsid);
+    WiFi.begin(staSsid, staPass);
 
-    int tries = 0;
-    while (WiFi.status() != WL_CONNECTED && tries < 15) {
-        log_d("Waiting for WiFi, try #%d...", tries);
+    int attempt = 0;
+    while (WiFi.status() != WL_CONNECTED && attempt < 15) {
+        attempt++;
+        log_d("Waiting for WiFi, attempt #%d...", attempt);
         delay(1000);
     }
 
     if (WiFi.status() != WL_CONNECTED) {
-        log_d("Fallbacking to AP mode");
-        WifiMode::AP();
+        if (fallbackToAP) {
+            log_d("Fallbacking to AP mode");
+            WifiMode::AP();
+        } else {
+            log_d("Failed to connect, turning WiFi off");
+            WifiMode::OFF();
+        }
     }
 }
 
 void WifiMode::OFF() 
 {
     currentMode = WIFI_OFF;
-
     WiFi.mode(WIFI_OFF);
-
-    isConnected = false;
-}
-
-void WifiMode::setSTAcredentials(String STASsid, String STAKey)
-{
-    WifiMode::STASsid = STASsid;
-    WifiMode::STAKey = STAKey;
 }

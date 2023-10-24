@@ -7,19 +7,42 @@ const float rescaleGPS = 10000000.0;
 
 class BaseFormatter
 {
-    public:
-        virtual File create(gps_fix gpsFix) = 0;
-        virtual bool write(File file, gps_fix gpsFix) = 0;
-        virtual bool close(File file) = 0;
-        const char *ts(gps_fix gpsFix, float fraction)
+    protected:
+        ulong startedAt;
+        
+        virtual void writeHeader(File file, gps_fix gpsFix) = 0;
+        virtual void filepath(char *filePath, gps_fix gpsFix) = 0;
+
+        String ts(gps_fix gpsFix, float fraction)
         {
             String timestamp = String((time_t) gpsFix.dateTime);
             timestamp += "." + String((int) ((fraction - (long) fraction) * 1000));
 
-            return timestamp.c_str();
+            return timestamp;
         }
-        const float accuracy(gps_fix gpsFix)
+
+        float accuracy(gps_fix gpsFix) { return gpsFix.lat_err() > gpsFix.lon_err() ? gpsFix.lat_err() : gpsFix.lon_err(); }
+        float duration() { return (millis() - startedAt) / 1000.0; }
+        
+    public:
+        File create(gps_fix gpsFix)
         {
-            return gpsFix.lat_err() > gpsFix.lon_err() ? gpsFix.lat_err() : gpsFix.lon_err();
+            char filePath[128];
+            filepath(filePath, gpsFix);
+
+            File file = SD.open(filePath, FILE_WRITE, true);    
+            startedAt = millis();
+
+            writeHeader(file, gpsFix);
+
+            return file;
         }
+
+        virtual bool write(File file, gps_fix gpsFix) = 0;        
+        virtual void close(File file) { file.close(); }
+        
+        virtual bool waitForValidLocation() 
+        {
+            return true;
+        }        
 };

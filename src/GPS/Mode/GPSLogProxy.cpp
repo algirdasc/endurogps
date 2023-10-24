@@ -19,51 +19,62 @@ void GPSLogProxy::formatter(uint formatter)
 }
 
 void GPSLogProxy::start()
-{
+{    
     isStarted = true;
-    fileCreated = false;    
 }
 
 void GPSLogProxy::stop()
 {
+    if (logFile) {
+        logFormatter->close(logFile);
+    }
+
     isStarted = false;
-    logFormatter->close(logFile);
+    isFileCreated = false;
 }
 
-void GPSLogProxy::handle(char *data, size_t size)
+void GPSLogProxy::handle(uint8_t *data, size_t size)
 {
     if (!isStarted) {
         return;
     }
 
-    nmeaGps.available();
-
-    uint8_t gpsData[GPS_MAX_BUFFER_SIZE];
     for (uint i = 0; i < size; i++) {
-        nmeaGps.handle((uint8_t) data[i]);
+        nmeaGps.handle(data[i]);
     }
 
     if (nmeaGps.available()) {
         gpsFix = nmeaGps.read();
-        if (!fileCreated && (!gpsFix.valid.date || !gpsFix.valid.time)) {
-            log_d("Waiting for valid GPS date/time to create file");
-
-            return;
-        }
-
-        if (!fileCreated) {
-            logFile = logFormatter->create(gpsFix);
-            fileCreated = true;
-        }
-
-        if (!logFormatter->write(logFile, gpsFix)) {
-            stop();
-            log_e("Failed to write GPS data");
-        }
+        handleGpsFix(gpsFix);
     }   
 
     if (nmeaGps.overrun()) {
         nmeaGps.overrun(false);
         log_e("Too much data");
+    }
+}
+
+void GPSLogProxy::handleGpsFix(gps_fix gpsFix)
+{
+    if (!gpsFix.valid.date || !gpsFix.valid.time) {
+        log_e("Waiting for valid GPS date/time to create file");
+
+        return;
+    }
+
+    if (!isFileCreated) {
+        logFile = logFormatter->create(gpsFix);
+        isFileCreated = true;
+    }
+
+    if (!gpsFix.valid.location) {
+        log_e("Invalid location, waiting...");
+
+        return;
+    }
+
+    if (isFileCreated && !logFormatter->write(logFile, gpsFix)) {
+        log_e("Failed to write GPS data");
+        stop();        
     }
 }

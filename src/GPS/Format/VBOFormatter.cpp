@@ -1,34 +1,22 @@
 #include "GPS/Formatter/VBOFormatter.h"
 
-File VOBFormatter::create(gps_fix gpsFix)
+const char VBO_FILE_FORMAT[] PROGMEM = "/Log-20%i%02d%02d-%02d%02d%02d.vbo";
+const char VBO_DATA_FORMAT[] PROGMEM = "%i %s %.9f %.9f %.1f %.1f %.1f %.1f";
+
+void VOBFormatter::filepath(char *filePath, gps_fix gpsFix)
 {
-    char csvFilePath[64];
-    sprintf(csvFilePath, "/Log-20%i%02d%02d-%02d%02d%02d EnduroGPS.vbo", 
+    sprintf(filePath, VBO_FILE_FORMAT, 
         gpsFix.dateTime.year, gpsFix.dateTime.month, gpsFix.dateTime.date, 
         gpsFix.dateTime.hours, gpsFix.dateTime.minutes, gpsFix.dateTime.seconds
     );
-
-    File file = SD.open(csvFilePath, FILE_WRITE, true);
-    writeHeader(file);
-    startedAt = millis();
-
-    return file;
 }
 
 bool VOBFormatter::write(File file, gps_fix gpsFix)
 {
-    if (!gpsFix.valid.location) {
-        log_i("Invalid location, waiting...");
-
-        return true;
-    }
-
-    float time = (millis() - startedAt) / 1000.0;
-
     char buffer[2048];
-    sprintf(buffer, "%i %s %.9f %.9f %.1f %.1f %.1f %.1f",
+    sprintf(buffer, VBO_DATA_FORMAT,
         gpsFix.satellites,                      // Satellites   %i
-        ts(gpsFix, time),                       // UTC Time     %s
+        ts(gpsFix, VOBFormatter::duration()),   // UTC Time     %s
         gpsFix.latitudeL() / rescaleGPS,        // Latitude     %.9f
         gpsFix.longitudeL() / rescaleGPS,       // Longitude    %.9f
         gpsFix.speed_kph(),                     // Speed        %.1f
@@ -44,14 +32,7 @@ bool VOBFormatter::write(File file, gps_fix gpsFix)
     return true;
 }
 
-bool VOBFormatter::close(File file)
-{
-    file.close();
-
-    return true;
-}
-
-void VOBFormatter::writeHeader(File file)
+void VOBFormatter::writeHeader(File file, gps_fix gpxFix)
 {
     file.println(F("File created on 31/07/2006 at 09:55:20 'generated from the VBOX internal Real time clock'"));
     file.println();    
@@ -69,7 +50,7 @@ void VOBFormatter::writeHeader(File file)
     file.println("Log rate: ");
     file.println("");    
     file.println("[column names]");
-    file.println("sats time lat long velocity heading PressureAltitude(m) accuracy");
+    file.println("sats time lat long velocity heading altitude(m) accuracy(m)");
     file.println("");
     file.println("[data]");
 }

@@ -4,11 +4,10 @@
 
 class VOBFormatter : public BaseFormatter
 {
-    private:
-        ulong startedAt;
-        void writeHeader(File file);
+    protected:
+        void writeHeader(File file, gps_fix gpsFix);
+        void filepath(char *filePath, gps_fix gpsFix);
     public:
         File create(gps_fix gpsFix);
         bool write(File file, gps_fix gpsFix);
-        bool close(File file);
 };

@@ -15,8 +15,8 @@ const char *GPS_PAGE_LOG_FORMAT_LABELS[] PROGMEM = {"TrackAddict CSV", "VBO"};
 const char *GPS_PAGE_BAUD_RATE_VALUES[] PROGMEM = {"38400", "57600", "115200"};
 const char *GPS_PAGE_OPTIMIZE_FOR_LABELS[] PROGMEM = {"", "RaceTime", "RaceChrono", "TrackAddict"};
 const char *GPS_PAGE_RATE_HZ_VALUES[] PROGMEM = {"1", "5", "10"};
-const char *GPS_PAGE_SV_CHANNELS_VALUES[] PROGMEM = {"0", "8"};
-const char *GPS_PAGE_SV_CHANNELS_LABELS[] PROGMEM = {"All", "8 channels"};
+const char *GPS_PAGE_SV_CHANNELS_VALUES[] PROGMEM = {"0", "8", "12", "16"};
+const char *GPS_PAGE_SV_CHANNELS_LABELS[] PROGMEM = {"Standard", "8 channels", "12 channels", "16 channels"};
 const char *GPS_PAGE_TALKER_ID_VALUES[] PROGMEM = {"0", "1"};
 const char *GPS_PAGE_TALKER_ID_LABELS[] PROGMEM = {"GP", "GP (GPS only)"};
 
@@ -77,7 +77,7 @@ class SettingsGPSHandler : public RequestHandler
             htmlOutput += F(R"raw(</div><div class="pure-u-1-2">)raw");
             htmlOutput += HTML::select(GPS_PAGE_MAIN_TALKER_ID, PARAM_GPS_NMEA_MAIN_TALKER, GPS_PAGE_TALKER_ID_VALUES, GPS_PAGE_TALKER_ID_LABELS, 2, String(params.storage.nmeaMainTalker));
             htmlOutput += F(R"raw(</div><div class="pure-u-1-2">)raw");
-            htmlOutput += HTML::select(GPS_PAGE_SV_PER_TALKER, PARAM_GPS_NMEA_SV_CHANNELS, GPS_PAGE_SV_CHANNELS_VALUES, GPS_PAGE_SV_CHANNELS_LABELS, 2, String(params.storage.nmeaSVChannels));
+            htmlOutput += HTML::select(GPS_PAGE_SV_PER_TALKER, PARAM_GPS_NMEA_SV_CHANNELS, GPS_PAGE_SV_CHANNELS_VALUES, GPS_PAGE_SV_CHANNELS_LABELS, 4, String(params.storage.nmeaSVChannels));
             htmlOutput += F(R"raw(</div><div class="pure-u-1-1">)raw");
             htmlOutput += HTML::checkbox(GPS_PAGE_NMEA_SERVER, PARAM_GPS_NMEA_TCP_ENABLED, params.storage.nmeaTcpEnabled);
             htmlOutput += F(R"raw(</div></div></fieldset><fieldset><legend>Presets</legend><div class="pure-g"><div class="pure-u-1-1">)raw");

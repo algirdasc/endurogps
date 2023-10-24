@@ -2,15 +2,11 @@
 
 #include "WiFi.h"
 
-#define MAX_AP_NAME_SIZE 20
-
 class WifiMode 
 {
     private:        
-        char accessPointSSID[MAX_AP_NAME_SIZE];
-        String STASsid;
-        String STAKey;
-
+        char accessPointSSID[20];
+        
         void STA();
         void AP();
         void OFF();
@@ -19,8 +15,9 @@ class WifiMode
         WifiMode();
 
         WiFiMode_t currentMode;
-        bool isConnected = false;
+        bool fallbackToAP = false;
+        String staSsid;
+        String staPass;
 
-        void mode(WiFiMode_t mode);
-        void setSTAcredentials(String STASsid, String STAKey);
+        void setMode(WiFiMode_t mode);
 };

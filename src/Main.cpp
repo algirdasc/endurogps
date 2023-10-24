@@ -12,7 +12,7 @@ GPSPort gpsPort;
 Params params;
 Battery battery;
 HTTP http;
-GPSBLEProxy gpsBLEProxy;
+GPSBTProxy gpsBTProxy;
 GPSLogProxy gpsLogProxy;
 
 static std::vector<AsyncClient*> NMEAClients;
@@ -25,106 +25,56 @@ Task taskStatusLedBlink(0, TASK_FOREVER, &ledBlink, &ts, false);
 
 void gpsInitialize()
 {    
-    params.load();
-
     gpsPort.initialize();
+    gpsPort.setBaudrate(params.storage.gpsBaudRate);
     gpsPort.setRate(params.storage.gpsRateHz);
-    gpsPort.setGSV(params.storage.nmeaGSV);
-    gpsPort.setGSA(params.storage.nmeaGSA);
-    gpsPort.setGBS(params.storage.nmeaGBS);
-    gpsPort.setGLL(params.storage.nmeaGLL);
-    gpsPort.setVTG(params.storage.nmeaVTG);
-    gpsPort.setMainTalker(params.storage.nmeaMainTalker);
-    gpsPort.setSVChannels(params.storage.nmeaSVChannels);
 }
 
 void startRecording()
 {
-    gpsInitialize();    
+    gpsPort.start();
 
     switch (params.storage.gpsMode) {
         case GPS_MODE_BT:
-            log_d("Starting ble logger");
-            gpsBLEProxy.start();
+            gpsBTProxy.start();
             break;
         case GPS_MODE_CSV:
-            log_d("Starting csv logger");
             gpsLogProxy.formatter(params.storage.logFormat);
             gpsLogProxy.start();
             break;
     }
+    
+    taskStatusLedBlink.enable();
 
     isRecording = true;
 }
 
 void stopRecording()
 {
-    gpsBLEProxy.stop();
-    gpsLogProxy.stop();
-    gpsPort.powerOff();
+    gpsBTProxy.stop();
+    gpsLogProxy.stop();    
+       
+    taskStatusLedBlink.disable();
+    statusLed.off();
 
     isRecording = false;
 }
 
-void powerOff()
-{
-    Template::redirect(http.server, PLEASE_WAIT_PAGE_BASE_URL);
-
-    stopRecording();
-
-    // nmeaServer.stop();        
-    statusLed.off();
-
-    // http.stop();     
-    // wifiMode.OFF();
-
-    taskStatusLedBlink.disable();
-    // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/sleep_modes.html
-    // rtc_gpio_isolate(GPIO_NUM_12);
-    // esp_sleep_pd_config(ESP_PD_DOMAIN_MAX, ESP_PD_OPTION_OFF);
-    // esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_OFF);
-    // esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
-    // esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
-    // esp_deep_sleep_start();
-}
-
-void restart()
-{
-    Template::redirect(http.server, PLEASE_WAIT_PAGE_BASE_URL);
-
-    esp_restart();
-}
-
-void buttonPressOneSec()
-{
-    isRecording ? stopRecording() : startRecording();
-}
-
-void buttonPressTenSec() 
-{
-    powerOff();
-}
-
-void bluetoothDisable()
-{
-    esp_bt_controller_disable();
-}
-
-static void NMEAClientReply(char *data, size_t size)
+static void NMEAClientReply(uint8_t *data, size_t size)
 {    
     for (uint i = 0; i < NMEAClients.size(); i++) {
         if (NMEAClients[i]->space() > size && NMEAClients[i]->canSend()) {
-            NMEAClients[i]->write(data, size);
+            NMEAClients[i]->write((char *) data, size);
         }
     }
 }
 
-static void NMEAHandleClientData(void* arg, AsyncClient *client, void *data, size_t len) 
+static void NMEAHandleClientData(void *arg, AsyncClient *client, void *data, size_t len) 
 {
     GPSSerial.write((uint8_t*) data, len);
 }
 
-static void NMEAHandleClientDisconnect(void* arg, AsyncClient* client)
+static void NMEAHandleClientDisconnect(void *arg, AsyncClient *client)
 {
     for (uint i = 0; i < NMEAClients.size(); i++) {
         if (NMEAClients[i]->disconnected()) {
@@ -133,7 +83,7 @@ static void NMEAHandleClientDisconnect(void* arg, AsyncClient* client)
     }
 }
 
-static void NMEAHandleClient(void* arg, AsyncClient* client)
+static void NMEAHandleClient(void *arg, AsyncClient *client)
 {
     NMEAClients.push_back(client);
 
@@ -164,21 +114,22 @@ void handleGPSPort()
     GPSSerial.readBytes(buf, len);
 
     if (server->status() == 1) {
-        NMEAClientReply((char *) buf, len);
+        NMEAClientReply(buf, len);
     }
 
     switch (params.storage.gpsMode) {
         case GPS_MODE_BT:
+            gpsBTProxy.handle(buf, len);
             break;
         case GPS_MODE_CSV:
-            gpsLogProxy.handle((char *) buf, len);
+            gpsLogProxy.handle(buf, len);
             break;
     }  
 }
 
 void wifiSetMode(WiFiMode_t mode)
 {
-    wifiMode.mode(mode);
+    wifiMode.setMode(mode);
 
     if (mode == WIFI_OFF) {
         NMEAServerStop();
@@ -190,6 +141,41 @@ void wifiSetMode(WiFiMode_t mode)
 
         http.start();
     }    
+}
+
+void restart()
+{
+    Template::redirect(http.server, PLEASE_WAIT_PAGE_BASE_URL);
+
+    esp_restart();
+}
+
+void powerOff()
+{
+    Template::redirect(http.server, PLEASE_WAIT_PAGE_BASE_URL);
+
+    stopRecording();
+    // wifiSetMode(WIFI_OFF);
+
+    gpsPort.stop();
+
+    // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/sleep_modes.html
+    // rtc_gpio_isolate(GPIO_NUM_12);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_MAX, ESP_PD_OPTION_OFF);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_OFF);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
+    esp_deep_sleep_start();
+}
+
+void buttonPressOneSec()
+{
+    isRecording ? stopRecording() : startRecording();
+}
+
+void buttonPressTenSec() 
+{
+    powerOff();
 }
 
 void buttonPressFiveSec() 
@@ -217,14 +203,16 @@ void setup()
     // SDCard start & check for updates
     sdCard.start();
 
-    // Turn of GPS after boot
-    gpsPort.powerOff();
-
     // Load parameters
     params.load();
 
+    // Initialize GPS
+    gpsInitialize();
+
     // Set wifi credentials
-    wifiMode.setSTAcredentials(params.storage.wifiStaSsid, params.storage.wifiStaPass);
+    wifiMode.staSsid = params.storage.wifiStaSsid;
+    wifiMode.staPass = params.storage.wifiStaPass;
+    wifiMode.fallbackToAP = params.storage.wifiFallbackAp;
 
     // Start wifi & services
     wifiSetMode(params.storage.wifiMode);
@@ -235,7 +223,7 @@ void setup()
 
     // TODO: remove?
     http.on(F("/gps/start"), startRecording);
-    http.on(F("/gps/stop"), stopRecording);   
+    http.on(F("/gps/stop"), stopRecording);
 
     // Button control
     button.begin();
@@ -243,28 +231,19 @@ void setup()
     button.onPressedFor(3000, buttonPressFiveSec);
     button.onPressedFor(10000, buttonPressTenSec);
 
-    // taskStatusLedBlink.setInterval(1000);
-    // taskStatusLedBlink.disable();
-
+    taskStatusLedBlink.setInterval(1000);    
     statusLed.off();
-
-    startRecording();
 
     // Dump information
     // log_d("Battery voltage: %.2f V", battery.voltage());
     // log_d("Battery percentage: %d %%", battery.percentage());
-
-    // log_d("Total heap: %d", ESP.getHeapSize());
-    // log_d("Free heap: %d", ESP.getFreeHeap());
-    // log_d("Total PSRAM: %d", ESP.getPsramSize());
-    // log_d("Free PSRAM: %d", ESP.getFreePsram());
 }
 
 void loop()
 {    
     handleGPSPort();
 
-    http.handleClient();    
+    http.handleClient();
 
     button.read();
 

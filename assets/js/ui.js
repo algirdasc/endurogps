@@ -1,7 +1,4 @@
 (function (window, document) {
-
-    // we fetch the elements each time because docusaurus removes the previous
-    // element references on page navigation
     function getElements() {
         return {
             layout: document.getElementById('layout'),
@@ -21,7 +18,6 @@
                 break;
             }
         }
-        // The className is not found
         if (length === classes.length) {
             classes.push(className);
         }
@@ -50,5 +46,4 @@
     }
     
     document.addEventListener('click', handleEvent);
-
 }(this, this.document));

@@ -30,6 +30,26 @@
         "cstdlib": "cpp",
         "filesystem": "cpp",
         "system_error": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "cstddef": "cpp",
+        "cctype": "cpp",
+        "clocale": "cpp",
+        "cstdarg": "cpp",
+        "cstdint": "cpp",
+        "cstdio": "cpp",
+        "cstring": "cpp",
+        "ctime": "cpp",
+        "cwchar": "cpp",
+        "cwctype": "cpp",
+        "exception": "cpp",
+        "iterator": "cpp",
+        "map": "cpp",
+        "memory_resource": "cpp",
+        "iosfwd": "cpp",
+        "iostream": "cpp",
+        "new": "cpp",
+        "stdexcept": "cpp",
+        "cinttypes": "cpp",
+        "typeinfo": "cpp"
     }
 }

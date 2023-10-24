@@ -9,6 +9,7 @@ void Params::save()
     preferences.putString(PARAM_WIFI_MODE, Params::wifiMode(storage.wifiMode));
     preferences.putString(PARAM_WIFI_STA_SSID, storage.wifiStaSsid);
     preferences.putString(PARAM_WIFI_STA_PASS, storage.wifiStaPass);    
+    preferences.putBool(PARAM_WIFI_FALLBACK_AP, storage.wifiFallbackAp);
 
     preferences.putUInt(PARAM_GPS_MODE, storage.gpsMode);
     preferences.putUInt(PARAM_GPS_RATE_HZ, storage.gpsRateHz);
@@ -35,6 +36,7 @@ void Params::load()
     storage.wifiMode = Params::wifiMode(preferences.getString(PARAM_WIFI_MODE));
     storage.wifiStaPass = preferences.getString(PARAM_WIFI_STA_PASS);
     storage.wifiStaSsid = preferences.getString(PARAM_WIFI_STA_SSID);
+    storage.wifiFallbackAp = preferences.getBool(PARAM_WIFI_FALLBACK_AP);
 
     storage.logFormat = preferences.getUInt(PARAM_GPS_LOG_FORMAT, LOG_FORMAT_TRACK_ADDICT_CSV);
 
@@ -59,16 +61,16 @@ String Params::wifiMode(WiFiMode_t wifiMode)
     String stringWifiMode;
     switch (wifiMode) {
         case WIFI_AP:
-            stringWifiMode = PARAM_WIFI_AP;
+            stringWifiMode = PARAM_WIFI_MODE_AP;
             break;
         case WIFI_STA:
-            stringWifiMode = PARAM_WIFI_STA;
+            stringWifiMode = PARAM_WIFI_MODE_STA;
             break;
         case WIFI_OFF:
-            stringWifiMode = PARAM_WIFI_OFF;
+            stringWifiMode = PARAM_WIFI_MODE_OFF;
             break;
         default:
-            stringWifiMode = PARAM_WIFI_AP;
+            stringWifiMode = PARAM_WIFI_MODE_AP;
             break;
     }
 
@@ -78,11 +80,11 @@ String Params::wifiMode(WiFiMode_t wifiMode)
 WiFiMode_t Params::wifiMode(String wifiMode)
 {
     // TODO: string comparison with "equals"
-    if (wifiMode == PARAM_WIFI_STA) {
+    if (wifiMode == PARAM_WIFI_MODE_STA) {
         return WIFI_STA;
-    } else if (wifiMode == PARAM_WIFI_AP) {
+    } else if (wifiMode == PARAM_WIFI_MODE_AP) {
         return WIFI_AP;        
-    } else if (wifiMode == PARAM_WIFI_OFF) {
+    } else if (wifiMode == PARAM_WIFI_MODE_OFF) {
         return WIFI_OFF;
     }
     

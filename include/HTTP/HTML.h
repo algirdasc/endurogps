@@ -35,7 +35,7 @@ class HTML
             return String(buff);
         }
 
-        static String input(String label, String name, String value = "", String type = "text")
+        static String input(const char *label, const char *name, const char *value = "", const char *type = "text")
         {
             char buff[512];
             sprintf(buff, HTML_INPUT_TAG, name, label, type, name, name, value);
@@ -43,7 +43,7 @@ class HTML
             return String(buff);
         }
 
-        static String button(String label, String url, String cssClass = "")
+        static String button(const char *label, const char *url, const char *cssClass = "")
         {
             char buff[128];
             sprintf(buff, HTML_BUTTON_TAG, url, cssClass, label);
@@ -61,7 +61,7 @@ class HTML
 
             for (int i = 0; i < options; i++) {
                 char option[128];
-                sprintf(option, HTML_SELECT_OPTION_TAG, values[i], (String(values[i]).equalsIgnoreCase(selected) ? "selected" : ""), labels[i]);       
+                sprintf(option, HTML_SELECT_OPTION_TAG, values[i], (selected.equalsIgnoreCase(values[i]) ? "selected" : ""), labels[i]);       
                 select += String(option);
             }
 

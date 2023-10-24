@@ -13,4 +13,4 @@
 #include "SDCard.h"
 #include "GPS/GPSPort.h"
 #include "GPS/Mode/GPSLogProxy.h"
-#include "GPS/Mode/GPSBLEProxy.h"
+#include "GPS/Mode/GPSBTProxy.h"

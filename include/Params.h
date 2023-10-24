@@ -24,20 +24,21 @@ const char PARAM_GPS_NMEA_MAIN_TALKER[] PROGMEM = "nmeaMainTalker";
 const char PARAM_GPS_NMEA_SV_CHANNELS[] PROGMEM = "nmeaSVChannels";
 const char PARAM_GPS_NMEA_TCP_ENABLED[] PROGMEM = "nmeaTcpEnabled";
 
-const char PARAM_WIFI_AP[] PROGMEM = "WIFI_AP";
-const char PARAM_WIFI_STA[] PROGMEM = "WIFI_STA";
-const char PARAM_WIFI_OFF[] PROGMEM = "WIFI_OFF";
-
+const char PARAM_WIFI_MODE_AP[] PROGMEM = "WIFI_AP";
+const char PARAM_WIFI_MODE_STA[] PROGMEM = "WIFI_STA";
+const char PARAM_WIFI_MODE_OFF[] PROGMEM = "WIFI_OFF";
 const char PARAM_WIFI_MODE[] PROGMEM = "wifiMode";
 const char PARAM_WIFI_STA_SSID[] PROGMEM = "wifiStaSsid";
 const char PARAM_WIFI_STA_PASS[] PROGMEM = "wifiStaPass";
+const char PARAM_WIFI_FALLBACK_AP[] PROGMEM = "wifiFallbackAp";
 
 struct StoredSettingsStruct
 {
     WiFiMode_t wifiMode;
     String wifiStaSsid;
     String wifiStaPass;
-
+    bool wifiFallbackAp;
+         
     uint gpsMode;
     uint gpsRateHz;
     uint gpsBaudRate;

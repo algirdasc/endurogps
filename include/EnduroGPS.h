@@ -1,5 +1,5 @@
 // Wifi Settings
-#define WIFI_AP_SSID        "EnduroGPS"
+#define DEVICE_NAME         "EnduroGPS"
 #define WIFI_AP_PASS        "endurogps815"
 #define WIFI_AP_MDNS        "endurogps.local"
 
@@ -14,7 +14,7 @@
 // HW
 #define GPIO_BATTERY        GPIO_NUM_35
 #define GPIO_BUTTON         GPIO_NUM_33
-#define GPIO_GPS_RX         GPIO_NUM_5 
+#define GPIO_GPS_RX         GPIO_NUM_13
 #define GPIO_GPS_TX         GPIO_NUM_15
 
 // Serial
@@ -28,5 +28,5 @@
 #define GPSSerial           Serial2
 
 // Misc
-#define UPDATE_FILE_PATH    "/update.bin"
+#define UPDATE_FILE_PATH    "/firmware.bin"
 #define UPDATE_FILE_URL     "https://tools.cici.lt/update.php"

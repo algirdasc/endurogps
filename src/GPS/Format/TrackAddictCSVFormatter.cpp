@@ -1,42 +1,27 @@
 #include "GPS/Formatter/TrackAddictCSVFormatter.h"
 #include <NeoTime.h>
 
-File TrackAddictCSVFormatter::create(gps_fix gpsFix)
+const char CSV_FILE_FORMAT[] PROGMEM = "/Log-20%i%02d%02d-%02d%02d%02d EnduroGPS.csv";
+const char CSV_DATA_FORMAT[] PROGMEM = "%.3f,%s,%i,%.3f,%.9f,%.9f,%.1f,%i,%.1f,%.1f,%.1f";
+
+void TrackAddictCSVFormatter::filepath(char *filePath, gps_fix gpsFix)
 {
-    char csvFilePath[64];
-    sprintf(csvFilePath, "/Log-20%i%02d%02d-%02d%02d%02d EnduroGPS.csv", 
+    sprintf(filePath, CSV_FILE_FORMAT, 
         gpsFix.dateTime.year, gpsFix.dateTime.month, gpsFix.dateTime.date, 
         gpsFix.dateTime.hours, gpsFix.dateTime.minutes, gpsFix.dateTime.seconds
     );
-
-    File file = SD.open(csvFilePath, FILE_WRITE, true);
-    writeHeader(file);
-    startedAt = millis();
-
-    return file;
-}
-
-bool TrackAddictCSVFormatter::close(File file)
-{
-    file.close();
-
-    return true;
 }
 
 bool TrackAddictCSVFormatter::write(File file, gps_fix gpsFix)
-{
-    if (!gpsFix.valid.location) {
-        log_i("Invalid location, waiting...");
-
-        return true;
-    }
-
-    float time = (millis() - startedAt) / 1000.0;
+{    
+    float duration = TrackAddictCSVFormatter::duration();
+    
+    Serial.println(ts(gpsFix, duration));
 
     char buffer[2048];
-    sprintf(buffer, "%.3f,%s,%i,%.3f,%.9f,%.9f,%.1f,%i,%.1f,%.1f,%.1f",
-        time,                               // Time                     %.3f
-        ts(gpsFix, time),                   // UTC Time                 %s
+    sprintf(buffer, CSV_DATA_FORMAT,
+        duration,                           // Time                     %.3f
+        ts(gpsFix, duration),               // UTC Time                 %s
         1,                                  // GPS Update               %i
         (float) gpsFix.dateTime_cs / 1000,  // GPS Delay                %.3f
         gpsFix.latitudeL() / rescaleGPS,    // Latitude                 %.9f
@@ -49,13 +34,13 @@ bool TrackAddictCSVFormatter::write(File file, gps_fix gpsFix)
     );
 
     Serial.println(buffer);    
-    file.println(buffer);
-    file.flush();
+    /*file.println(buffer);
+    file.flush();*/
 
     return true;
 }
 
-void TrackAddictCSVFormatter::writeHeader(File file)
+void TrackAddictCSVFormatter::writeHeader(File file, gps_fix gpsFix)
 {
     // User settings:
     // U1 - Units (U1 - kph, U0 - mph)

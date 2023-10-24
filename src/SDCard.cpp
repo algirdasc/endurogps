@@ -39,7 +39,7 @@ void SDCard::start()
 void SDCard::fwUpdateCheck()
 {
     if (!SD.exists(UPDATE_FILE_PATH)) {
-        log_d("No firmware updates found");
+        log_i("No firmware updates found");
 
         return;
     }
@@ -54,6 +54,7 @@ void SDCard::fwUpdateCheck()
 
     size_t updateSize = updateBin.size();
     if (updateSize == 0) {
+        updateBin.close();
         log_e("Firmware update file is empty");
 
         return;
@@ -70,8 +71,7 @@ void SDCard::fwUpdate(Stream &updateFile, size_t updateSize)
         return;
     }
 
-    size_t writtenSize = Update.writeStream(updateFile);
-    
+    size_t writtenSize = Update.writeStream(updateFile);  
     log_i("Written %u out of %u", writtenSize, updateSize);
 
     if (!Update.end()) {

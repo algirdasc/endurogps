@@ -8,10 +8,11 @@
 
 
 const char WIFI_PAGE_BASE_URL[] PROGMEM = "/settings/wifi";
-const char WIFI_PAGE_WIFI_MODE[] PROGMEM = "Wireless mode";
+const char WIFI_PAGE_WIFI_MODE[] PROGMEM = "Default wireless mode";
 const char WIFI_PAGE_WIFI_SSID[] PROGMEM = "Wireless network";
+const char WIFI_PAGE_FALLBACK_AP[] PROGMEM = "On connection failure, fallback to AP mode";
 
-const char *WIFI_PAGE_MODE_VALUES[] PROGMEM = {PARAM_WIFI_AP, PARAM_WIFI_STA, PARAM_WIFI_OFF};
+const char *WIFI_PAGE_MODE_VALUES[] PROGMEM = {PARAM_WIFI_MODE_AP, PARAM_WIFI_MODE_STA, PARAM_WIFI_MODE_OFF};
 const char *WIFI_PAGE_MODE_LABELS[] PROGMEM = {"Access Point", "Client", "Off"};
 
 
@@ -19,11 +20,6 @@ class SettingsWifiHandler : public RequestHandler
 {
     private:
         Params params;
-
-        uint availableWifiStations = 0;
-        String wifiStationsValues[128] = {};
-        String wifiStationsLabels[128] = {};
-
     public:
         bool canHandle(HTTPMethod requestMethod, String requestUri)
         {            
@@ -40,10 +36,17 @@ class SettingsWifiHandler : public RequestHandler
 
             String htmlOutput = HTML::formStart();
 
-            htmlOutput += HTML::select(WIFI_PAGE_WIFI_MODE, PARAM_WIFI_MODE, WIFI_PAGE_MODE_VALUES, WIFI_PAGE_MODE_LABELS, 3, params.wifiMode(params.storage.wifiMode));
-            htmlOutput += F(R"raw(<fieldset id="wifi_sta"><legend>Available networks <a href="/settings/wifi?scan=1" class="float-right">Scan</a></legend><div class="pure-g"><div class="pure-u-3-5">)raw");
+            htmlOutput += F(R"raw(<fieldset><legend>Settings</legend><div class="pure-g"><div class="pure-u-1">)raw");
+            htmlOutput += HTML::select(WIFI_PAGE_WIFI_MODE, PARAM_WIFI_MODE, WIFI_PAGE_MODE_VALUES, WIFI_PAGE_MODE_LABELS, 3, params.wifiMode(params.storage.wifiMode));            
+            htmlOutput += F(R"raw(</div><div class="pure-u-1">)raw");
+            htmlOutput += HTML::checkbox(WIFI_PAGE_FALLBACK_AP, PARAM_WIFI_FALLBACK_AP, params.storage.wifiFallbackAp);
+
+            htmlOutput += F(R"raw(</div></fieldset><fieldset><legend>Available networks <a href="/settings/wifi?scan=1" class="float-right">Scan</a></legend><div class="pure-g"><div class="pure-u-3-5">)raw");
 
             if (server.hasArg(F("scan"))) {
+                uint availableWifiStations = 0;
+                String wifiStationsValues[128] = {};
+                String wifiStationsLabels[128] = {};                
                 availableWifiStations = WiFi.scanNetworks();
                 if (availableWifiStations > 0) {                               
                     for (int i = 0; i < availableWifiStations; i++) {
@@ -57,11 +60,11 @@ class SettingsWifiHandler : public RequestHandler
                 //TODO: fix
                 // htmlOutput += HTML::select(WIFI_PAGE_WIFI_SSID, PARAM_WIFI_STA_SSID, wifiStationsValues, wifiStationsLabels, availableWifiStations, params.storage.wifiStaSsid);                
             } else {
-                htmlOutput += HTML::input(WIFI_PAGE_WIFI_SSID, PARAM_WIFI_STA_SSID, params.storage.wifiStaSsid);
+                htmlOutput += HTML::input(WIFI_PAGE_WIFI_SSID, PARAM_WIFI_STA_SSID, params.storage.wifiStaSsid.c_str());
             }
 
             htmlOutput += F(R"raw(</div><div class="pure-u-2-5">)raw");
-            htmlOutput += HTML::input(F("Password"), PARAM_WIFI_STA_PASS, params.storage.wifiStaPass, F("password"));
+            htmlOutput += HTML::input("Password", PARAM_WIFI_STA_PASS, params.storage.wifiStaPass.c_str(), "password");
             htmlOutput += F("</div></div></fieldset>");
 
             htmlOutput += HTML::formEnd();
@@ -76,6 +79,7 @@ class SettingsWifiHandler : public RequestHandler
         bool handlePost(WebServer &server, HTTPMethod requestMethod, String requestUri)
         {
             params.storage.wifiMode = params.wifiMode(server.arg(PARAM_WIFI_MODE));
+            params.storage.wifiFallbackAp = server.hasArg(PARAM_WIFI_FALLBACK_AP);
 
             if (server.hasArg(PARAM_WIFI_STA_SSID)) {
                 params.storage.wifiStaSsid = server.arg(PARAM_WIFI_STA_SSID);
