@@ -7,4 +7,5 @@
 [] TODO: Customize BT AP
 [] TODO: Add toast message after save
 [] TODO: Test BT proxy when client disconnects
-[] TODO: Join CSS files to one
+[x] TODO: Join CSS files to one
+[] BUG: fix page title & subtitle

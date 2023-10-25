@@ -13,60 +13,61 @@ const char HTML_INPUT_TAG[] PROGMEM = R"raw(<label for="in_%s">%s</label><input 
 
 class HTML
 {
-    public:
-        static String formStart()
+public:
+    static String formStart()
+    {
+        return String(HTML_FORM_OPEN_TAG);
+    }
+
+    static String formEnd(const char *submitText = "Submit")
+    {
+        char buff[128];
+        sprintf(buff, HTML_FORM_CLOSE_TAG, submitText);
+
+        return String(buff);
+    }
+
+    static String checkbox(const char *label, const char *name, bool checked)
+    {
+        char buff[256];
+        sprintf(buff, HTML_CHECKBOX_TAG, name, name, name, (checked ? "checked" : ""), label);
+
+        return String(buff);
+    }
+
+    static String input(const char *label, const char *name, const char *value = "", const char *type = "text")
+    {
+        char buff[512];
+        sprintf(buff, HTML_INPUT_TAG, name, label, type, name, name, value);
+
+        return String(buff);
+    }
+
+    static String button(const char *label, const char *url, const char *cssClass = "")
+    {
+        char buff[128];
+        sprintf(buff, HTML_BUTTON_TAG, url, cssClass, label);
+
+        // TODO: use buff?
+        return String(buff);
+    }
+
+    static String select(const char *label, const char *name, const char *values[], const char *labels[], int options = 0, String selected = "")
+    {
+        char buff[256];
+        sprintf(buff, HTML_SELECT_TAG_OPEN, name, label, name, name);
+
+        String select = buff;
+
+        for (int i = 0; i < options; i++)
         {
-            return String(HTML_FORM_OPEN_TAG);
+            char option[128];
+            sprintf(option, HTML_SELECT_OPTION_TAG, values[i], (selected.equalsIgnoreCase(values[i]) ? "selected" : ""), labels[i]);
+            select += String(option);
         }
 
-        static String formEnd(const char *submitText = "Submit")
-        {
-            char buff[128];
-            sprintf(buff, HTML_FORM_CLOSE_TAG, submitText);
+        select += HTML_SELECT_TAG_CLOSE;
 
-            return String(buff);
-        }
-
-        static String checkbox(const char *label, const char *name, bool checked)
-        {
-            char buff[256];
-            sprintf(buff, HTML_CHECKBOX_TAG, name, name, name, (checked ? "checked" : ""), label); 
-
-            return String(buff);
-        }
-
-        static String input(const char *label, const char *name, const char *value = "", const char *type = "text")
-        {
-            char buff[512];
-            sprintf(buff, HTML_INPUT_TAG, name, label, type, name, name, value);
-
-            return String(buff);
-        }
-
-        static String button(const char *label, const char *url, const char *cssClass = "")
-        {
-            char buff[128];
-            sprintf(buff, HTML_BUTTON_TAG, url, cssClass, label);
-
-            // TODO: use buff?
-            return String(buff);
-        }
-
-        static String select(const char *label, const char *name, const char *values[], const char *labels[], int options = 0, String selected = "")
-        {
-            char buff[256];
-            sprintf(buff, HTML_SELECT_TAG_OPEN, name, label, name, name);
-
-            String select = buff;
-
-            for (int i = 0; i < options; i++) {
-                char option[128];
-                sprintf(option, HTML_SELECT_OPTION_TAG, values[i], (selected.equalsIgnoreCase(values[i]) ? "selected" : ""), labels[i]);       
-                select += String(option);
-            }
-
-            select += HTML_SELECT_TAG_CLOSE;
-
-            return select;
-        }
+        return select;
+    }
 };

@@ -91,4 +91,3 @@ for css_file in temp_files["css"]:
 with open("{}/{}".format(assets_dir, css_header_file), "w") as header:
     header.write("#pragma once\n\n")
     header.write("const char {}[] PROGMEM = R\"raw({})raw\";".format(variable_name(css_header_file), css_file_content))
-
