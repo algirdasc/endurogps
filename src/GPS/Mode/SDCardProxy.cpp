@@ -1,29 +1,29 @@
-#include "GPS/Mode/GPSLogProxy.h"
+#include "GPS/Mode/SDCardProxy.h"
 
-GPSLogProxy::GPSLogProxy()
+SDCardProxy::SDCardProxy()
 {
     NMEAGPS nmeaGps;
     gps_fix gpsFix;
 }
 
-void GPSLogProxy::formatter(uint formatter)
+void SDCardProxy::formatter(uint formatter)
 {
     switch (formatter) {
-        case LOG_FORMAT_TRACK_ADDICT_CSV:
-            logFormatter = new TrackAddictCSVFormatter();
-            break;
-        case LOG_FORMAT_VOB:
+        case LOG_FORMAT_VBO:
             logFormatter = new VOBFormatter();
             break;
+        case LOG_FORMAT_CSV_TRACKADDICT:
+            logFormatter = new TrackAddictCSVFormatter();
+            break;        
     }
 }
 
-void GPSLogProxy::start()
+void SDCardProxy::start()
 {    
     isStarted = true;
 }
 
-void GPSLogProxy::stop()
+void SDCardProxy::stop()
 {
     if (logFile) {
         logFormatter->close(logFile);
@@ -33,7 +33,7 @@ void GPSLogProxy::stop()
     isFileCreated = false;
 }
 
-void GPSLogProxy::handle(uint8_t *data, size_t size)
+void SDCardProxy::handle(uint8_t *data, size_t size)
 {
     if (!isStarted) {
         return;
@@ -54,7 +54,7 @@ void GPSLogProxy::handle(uint8_t *data, size_t size)
     }
 }
 
-void GPSLogProxy::handleGpsFix(gps_fix gpsFix)
+void SDCardProxy::handleGpsFix(gps_fix gpsFix)
 {
     if (!gpsFix.valid.date || !gpsFix.valid.time) {
         log_e("Waiting for valid GPS date/time to create file");

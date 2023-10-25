@@ -24,8 +24,8 @@ bool TrackAddictCSVFormatter::write(File file, gps_fix gpsFix)
         ts(gpsFix, duration),               // UTC Time                 %s
         1,                                  // GPS Update               %i
         (float) gpsFix.dateTime_cs / 1000,  // GPS Delay                %.3f
-        gpsFix.latitudeL() / rescaleGPS,    // Latitude                 %.9f
-        gpsFix.longitudeL() / rescaleGPS,   // Longitude                %.9f
+        gpsFix.latitudeL() / RESCALE_GPS,   // Latitude                 %.9f
+        gpsFix.longitudeL() / RESCALE_GPS,  // Longitude                %.9f
         gpsFix.altitude(),                  // Altitude (m)             %.1f
         (uint) gpsFix.altitude_ft(),        // Altitude (ft)            %i
         gpsFix.speed_kph(),                 // Speed km/h               %.1f

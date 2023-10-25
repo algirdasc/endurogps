@@ -2,14 +2,14 @@
 
 #include <Arduino.h>
 
-const char HTML_SELECT_TAG_OPEN[] PROGMEM = R"raw(<label for="se_%s">%s</label><select class="pure-input-1" id="se_%s" name="%s">)raw";
+const char HTML_SELECT_TAG_OPEN[] PROGMEM = R"raw(<label for="se_%s">%s</label><select class="form-control" id="se_%s" name="%s">)raw";
 const char HTML_SELECT_OPTION_TAG[] PROGMEM = R"raw(<option value="%s"%s>%s</option>)raw";
 const char HTML_SELECT_TAG_CLOSE[] PROGMEM = "</select>";
-const char HTML_BUTTON_TAG[] PROGMEM = R"raw(<a href="%s" class="pure-button %s">%s</a>)raw";
-const char HTML_FORM_OPEN_TAG[] PROGMEM = R"raw(<form class="pure-form pure-form-stacked" method="POST">)raw";
-const char HTML_FORM_CLOSE_TAG[] PROGMEM = R"raw(<button type="submit" class="pure-button pure-button-primary">%s</button></form>)raw";
-const char HTML_CHECKBOX_TAG[] PROGMEM = R"raw(<label for="ch_%s" class="pure-checkbox"><input type="checkbox" id="ch_%s" name="%s" value="1" %s /> %s</label>)raw";
-const char HTML_INPUT_TAG[] PROGMEM = R"raw(<label for="in_%s">%s</label><input type="%s" maxlength="255" class="pure-input-1" id="in_%s" name="%s" value="%s" />)raw";
+const char HTML_BUTTON_TAG[] PROGMEM = R"raw(<a href="%s" class="btn %s">%s</a>)raw";
+const char HTML_FORM_OPEN_TAG[] PROGMEM = R"raw(<form method="POST">)raw";
+const char HTML_FORM_CLOSE_TAG[] PROGMEM = R"raw(<button type="submit" class="btn btn-primary">%s</button></form>)raw";
+const char HTML_CHECKBOX_TAG[] PROGMEM = R"raw(<div class="checkbox"><label for="ch_%s" class="pure-checkbox"><input type="checkbox" id="ch_%s" name="%s" value="1" %s /> %s</label></div>)raw";
+const char HTML_INPUT_TAG[] PROGMEM = R"raw(<label for="in_%s">%s</label><input type="%s" maxlength="255" class="form-control" id="in_%s" name="%s" value="%s" />)raw";
 
 class HTML
 {

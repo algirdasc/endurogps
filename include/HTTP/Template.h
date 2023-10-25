@@ -8,13 +8,16 @@
 #include "HTTP/Assets/HTML/Header.h"
 #include "HTTP/Assets/HTML/Footer.h"
 
-#define WEBPORTAL_HEADER_STATIC_SIZE 350
-#define WEBPORTAL_HEADER_DYN_SIZE 150
-#define WEBPORTAL_FOOTER_STATIC_SIZE 210
+#define WEBPORTAL_HEADER_STATIC_SIZE 2048
+#define WEBPORTAL_HEADER_DYN_SIZE 128
+#define WEBPORTAL_FOOTER_STATIC_SIZE 64
 
 const char contentTypeHtml[] PROGMEM = "text/html";
 const char contentTypeCss[] PROGMEM = "text/css";
 const char contentTypeStream[] PROGMEM = "application/octet-stream";
+
+const char TEMPLATE_PAGE_TITLE[] PROGMEM = R"raw(<div class="page-header"><h1>%s</h1></div>%s)raw";
+const char TEMPLATE_PAGE_SUBTITLE[] PROGMEM = R"raw(<p class="lead text-muted">%s</p>)raw";
 
 class Template
 {
@@ -26,16 +29,20 @@ class Template
             htmlBody.reserve(WEBPORTAL_HEADER_STATIC_SIZE + WEBPORTAL_HEADER_DYN_SIZE + WEBPORTAL_FOOTER_STATIC_SIZE + content.length());
             htmlBody += String(HTML_HEADER);
 
-            if (title != "") {
-                htmlBody += "<div class=\"header\">";
-                htmlBody += "<h1>" + title + "</h1>";
-                if (subtitle != "") {
-                    htmlBody += "<h2>" + subtitle + "</h2>";
-                }
-                htmlBody += "</div>";                    
-            }
+            // if (title != "") {                
+            //     char title[128];
+            //     char subtitle[128];
 
-            htmlBody += "<div class=\"content\">" + content + "</div>";
+            //     if (subtitle != "") {
+            //         sprintf(subtitle, TEMPLATE_PAGE_SUBTITLE, subtitle);
+            //     }
+                
+            //     sprintf(title, TEMPLATE_PAGE_TITLE, title, subtitle);
+
+            //     htmlBody += title;
+            // }
+
+            htmlBody += content;
             htmlBody += String(batteryContainer());
             htmlBody += String(HTML_FOOTER);
 

@@ -4,7 +4,7 @@
 #include "HTTP/Template.h"
 #include "HTTP/HTTPCodes.h"
 #include "HTTP/Assets/CSS/Style.h"
-#include "HTTP/Assets/CSS/PureCSS.h"
+// #include "HTTP/Assets/JS/Script.h"
 
 class AssetHandler : public RequestHandler
 {
@@ -18,13 +18,13 @@ class AssetHandler : public RequestHandler
         {
             server.sendHeader("Cache-Control", "max-age=86400");
 
-            if (requestUri == "/pure-css.css") {
-                server.send_P(HTTP_CODE_OK, contentTypeCss, CSS_PURECSS);
-            }
-
-            if (requestUri == "/style.css") {
+            if (requestUri == "/css/style.css") {
                 server.send_P(HTTP_CODE_OK, contentTypeCss, CSS_STYLE);
             }
+
+            // if (requestUri == "/js/script.css") {
+            //     server.send_P(HTTP_CODE_OK, contentTypeCss, JS_SCRIPT);
+            // }
 
             return true;
         }

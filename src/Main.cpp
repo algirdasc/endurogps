@@ -12,8 +12,8 @@ GPSPort gpsPort;
 Params params;
 Battery battery;
 HTTP http;
-GPSBTProxy gpsBTProxy;
-GPSLogProxy gpsLogProxy;
+BluetoothProxy gpsBTProxy;
+SDCardProxy gpsSDCardProxy;
 
 static std::vector<AsyncClient*> NMEAClients;
 
@@ -26,8 +26,8 @@ Task taskStatusLedBlink(0, TASK_FOREVER, &ledBlink, &ts, false);
 void gpsInitialize()
 {    
     gpsPort.initialize();
+    gpsPort.setRefreshRate(params.storage.gpsRateHz);
     gpsPort.setBaudrate(params.storage.gpsBaudRate);
-    gpsPort.setRate(params.storage.gpsRateHz);
 }
 
 void startRecording()
@@ -38,9 +38,9 @@ void startRecording()
         case GPS_MODE_BT:
             gpsBTProxy.start();
             break;
-        case GPS_MODE_CSV:
-            gpsLogProxy.formatter(params.storage.logFormat);
-            gpsLogProxy.start();
+        case GPS_MODE_SDCARD:
+            gpsSDCardProxy.formatter(params.storage.logFormat);
+            gpsSDCardProxy.start();
             break;
     }
     
@@ -52,7 +52,7 @@ void startRecording()
 void stopRecording()
 {
     gpsBTProxy.stop();
-    gpsLogProxy.stop();    
+    gpsSDCardProxy.stop();    
        
     taskStatusLedBlink.disable();
     statusLed.off();
@@ -121,8 +121,8 @@ void handleGPSPort()
         case GPS_MODE_BT:
             gpsBTProxy.handle(buf, len);
             break;
-        case GPS_MODE_CSV:
-            gpsLogProxy.handle(buf, len);
+        case GPS_MODE_SDCARD:
+            gpsSDCardProxy.handle(buf, len);
             break;
     }  
 }

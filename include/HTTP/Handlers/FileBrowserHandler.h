@@ -12,30 +12,20 @@ const char FILEBROWSER_PAGE_BASE_URL[] PROGMEM = "/sdcard";
 const char FILEBROWSER_PAGE_TITLE[] PROGMEM = "File browser";
 const char FILEBROWSER_PAGE_404_ERROR[] PROGMEM = "SD Card is unavailable or path does not exist";
 const char FILEBROWSER_PAGE_TABLE_HEADER_TEMPLATE[] PROGMEM = R"raw(
-    <table class="pure-table pure-table-horizontal pure-table-stretch">
+    <table class="table table-striped">
         <thead>
             <tr>
                 <th></th>
                 <th>Filename</th>
-                <th>Size</th>
-                <th>Actions</th>
+                <th class="text-right">Size</th>
+                <th class="text-right">Actions</th>
             </tr>
         </thead>
         <tbody>
 )raw";
-const char FILEBROWSER_PAGE_TABLE_FOOTER_TEMPLATE[] PROGMEM = R"raw(
-        </tbody>
-    </table>
-    </div></div>
-)raw";
-const char FILEBROWSER_PAGE_DIRECTORY_EMPTY_ROW[] PROGMEM = R"raw(
-    <tr>
-        <td class="text-center" colspan="100">
-            Directory is empty
-        </td>
-    </tr>
-)raw";
-
+const char FILEBROWSER_PAGE_TABLE_FOOTER_TEMPLATE[] PROGMEM = R"raw(</tbody></table></div></div>)raw";
+const char FILEBROWSER_PAGE_TABLE_EMPTY_DIR_ROW[] PROGMEM = R"raw(<tr><td class="text-center" colspan="100">Directory is empty</td></tr>)raw";
+const char FILEBROWSER_PAGE_TABLE_ROW[] PROGMEM = R"raw(<tr><td>[%s]</td><td><a href="%s">%s</a></td><td class="text-right">%s</td><td class="text-right"><a href="%s?delete=1" class="btn btn-xs btn-danger" onclick="confirm('Are you sure you want to delete this item?');">Delete</a></td></tr>)raw";
 
 class FileBrowserHandler : public RequestHandler
 {
@@ -137,7 +127,7 @@ class FileBrowserHandler : public RequestHandler
                 File entry = dir.openNextFile();
                 if (!entry) {
                     if (fileCount == 0) {
-                        table += FILEBROWSER_PAGE_DIRECTORY_EMPTY_ROW;
+                        table += FILEBROWSER_PAGE_TABLE_EMPTY_DIR_ROW;
                     }
 
                     break;                    
@@ -145,25 +135,18 @@ class FileBrowserHandler : public RequestHandler
 
                 fileCount++;    
 
-                // TODO: optimize icon html
-                String icon = R"raw(<span class="icon file"></span>)raw";
-                if (entry.isDirectory()) {
-                    icon = R"raw(<span class="icon folder"></span>)raw";
-                }
-
                 String entryAbsoluteUrl = absoluteUrl(entry.path());
                                 
-                table += "<tr><td>" + icon + "</td>";
-                table += "<td><a href=\"" + entryAbsoluteUrl + "\">";
-                table += entry.name();
-                table += "</a></td>";
+                char tableRow[512];
+                sprintf(tableRow, FILEBROWSER_PAGE_TABLE_ROW, 
+                    entry.isDirectory() ? "DIR" : "FILE", 
+                    entryAbsoluteUrl.c_str(), 
+                    entry.name(), 
+                    entry.isDirectory() ? "" : bytesToHumanReadable(entry.size()), 
+                    entryAbsoluteUrl.c_str()
+                );
 
-                table += "<td><span>";
-                table += entry.isDirectory() ? "" : bytesToHumanReadable(entry.size());
-                table += "</span></td>";
-
-                table += "<td class=\"text-center\"><a href=\"" + entryAbsoluteUrl + "?delete=1\" onclick=\"confirm('Are you sure you want to delete this item?');\">";
-                table += "<span class=\"icon delete\"></span></a></td></tr>";
+                table += String(tableRow);
 
                 entry.close();                        
             }

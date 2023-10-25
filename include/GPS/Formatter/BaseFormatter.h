@@ -3,7 +3,9 @@
 #include <SD.h>
 #include <NMEAGPS.h>
 
-const float rescaleGPS = 10000000.0;
+#define RESCALE_GPS                 10000000.0
+#define LOG_FORMAT_VBO              0
+#define LOG_FORMAT_CSV_TRACKADDICT  1
 
 class BaseFormatter
 {

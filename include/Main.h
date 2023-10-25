@@ -12,5 +12,5 @@
 #include "LED.h"
 #include "SDCard.h"
 #include "GPS/GPSPort.h"
-#include "GPS/Mode/GPSLogProxy.h"
-#include "GPS/Mode/GPSBTProxy.h"
+#include "GPS/Mode/SDCardProxy.h"
+#include "GPS/Mode/BluetoothProxy.h"

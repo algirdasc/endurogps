@@ -6,7 +6,7 @@
 #include "EnduroGPS.h"
 #include "GPS/Mode/BaseProxy.h"
 
-class GPSBTProxy : public BaseProxy
+class BluetoothProxy : public BaseProxy
 {
     private:
         BluetoothSerial serialBT;
@@ -14,7 +14,7 @@ class GPSBTProxy : public BaseProxy
         bool isDeviceConnected = false;
 
     public:
-        GPSBTProxy();
+        BluetoothProxy();
 
         void start();
         void stop();

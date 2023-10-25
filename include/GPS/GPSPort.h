@@ -5,11 +5,14 @@
 #include "EnduroGPS.h"
 #include "GPS/UBLOXMessages.h"
 
-// TODO: move to params?
-#define GPSPORT_MAINTALKER_GP 0
-#define GPSPORT_MAINTALKER_GP_GPSONLY 1
-#define GPSPORT_POWER_SAVE 1800
-#define GPSPORT_SV_CHANNELS 0
+#define GPS_MODE_SDCARD 0
+#define GPS_MODE_BT     1
+#define GPS_RATE_1_HZ   1
+#define GPS_RATE_5_HZ   5
+#define GPS_RATE_10_HZ  10
+#define GPS_RATE_38400  38400
+#define GPS_RATE_57600  57600
+#define GPS_RATE_115200 115200
 
 class GPSPort
 {    
@@ -19,13 +22,6 @@ class GPSPort
         void stop();
         void start();
         void setBaudrate(uint32_t baudRate);
-        void setRate(uint rate);        
-        void setGSV(bool enabled);
-        void setGSA(bool enabled);
-        void setGBS(bool enabled);
-        void setGLL(bool enabled);
-        void setVTG(bool enabled);
-        void setMainTalker(uint talkerID);
+        void setRefreshRate(uint refreshRate);
         void setPowerSave(uint timeS);
-        void setSVChannels(uint channels);
 };

@@ -34,13 +34,13 @@ void GPSPort::pushMessage(const char message[], uint size)
 void GPSPort::setBaudrate(uint32_t baudRate)
 {
     switch (baudRate) {
-        case 38400:
+        case GPS_RATE_38400:
             pushMessage(UBLOX_BAUD_38400, sizeof(UBLOX_BAUD_38400));
             break;
-        case 57600:
+        case GPS_RATE_57600:
             pushMessage(UBLOX_BAUD_57600, sizeof(UBLOX_BAUD_57600));
             break;
-        case 115200:
+        case GPS_RATE_115200:
             pushMessage(UBLOX_BAUD_115200, sizeof(UBLOX_BAUD_115200));
             break;
         default:
@@ -54,19 +54,16 @@ void GPSPort::setBaudrate(uint32_t baudRate)
     GPSSerial.updateBaudRate(baudRate);
 }
 
-void GPSPort::setRate(uint rate)
+void GPSPort::setRefreshRate(uint refreshRate)
 {
-    switch (rate) {
-        case 1:
-            log_d("Seting 1hz");
+    switch (refreshRate) {
+        case GPS_RATE_1_HZ:
             pushMessage(UBLOX_INIT_1HZ, sizeof(UBLOX_INIT_1HZ));
             break;
-        case 5:
-            log_d("Seting 5hz");
+        case GPS_RATE_5_HZ:
             pushMessage(UBLOX_INIT_5HZ, sizeof(UBLOX_INIT_5HZ));
             break;
-        case 10:
-            log_d("Seting 10hz");
+        case GPS_RATE_10_HZ:
             pushMessage(UBLOX_INIT_10HZ, sizeof(UBLOX_INIT_10HZ));
             break;
     }
@@ -82,43 +79,6 @@ void GPSPort::start()
     pushMessage(UBLOX_PWR_START, sizeof(UBLOX_PWR_START));
 }
 
-void GPSPort::setGSV(bool enabled)
-{
-    // enabled ? pushMessage(UBLOX_GxGSV_ON, sizeof(UBLOX_GxGSV_ON)) : pushMessage(UBLOX_GxGSV_OFF, sizeof(UBLOX_GxGSV_OFF));
-}
-
-void GPSPort::setGSA(bool enabled)
-{
-    // enabled ? pushMessage(UBLOX_GxGSA_ON, sizeof(UBLOX_GxGSA_ON)) : pushMessage(UBLOX_GxGSA_OFF, sizeof(UBLOX_GxGSA_OFF));
-}
-
-void GPSPort::setGBS(bool enabled)
-{
-    // enabled ? pushMessage(UBLOX_GxGBS_ON, sizeof(UBLOX_GxGBS_ON)) : pushMessage(UBLOX_GxGBS_OFF, sizeof(UBLOX_GxGBS_OFF));
-}
-
-void GPSPort::setGLL(bool enabled)
-{
-    // enabled ? pushMessage(UBLOX_GxGLL_ON, sizeof(UBLOX_GxGLL_ON)) : pushMessage(UBLOX_GxGLL_OFF, sizeof(UBLOX_GxGLL_OFF));
-}
-
-void GPSPort::setVTG(bool enabled)
-{
-    // enabled ? pushMessage(UBLOX_GxVTG_ON, sizeof(UBLOX_GxVTG_ON)) : pushMessage(UBLOX_GxVTG_OFF, sizeof(UBLOX_GxVTG_OFF));
-}
-
-void GPSPort::setMainTalker(uint talkerID)
-{
-    // switch (talkerID) {
-    //     case GPSPORT_MAINTALKER_GP:
-    //         pushMessage(UBLOX_INIT_MAINTALKER_GP, sizeof(UBLOX_INIT_MAINTALKER_GP));
-    //         break;
-    //     case GPSPORT_MAINTALKER_GP_GPSONLY:
-    //         pushMessage(UBLOX_INIT_MAINTALKER_GP_GPSONLY, sizeof(UBLOX_INIT_MAINTALKER_GP_GPSONLY));
-    //         break;            
-    // }    
-}
-
 void GPSPort::setPowerSave(uint timeS)
 {
     // switch (timeS) {
@@ -127,24 +87,6 @@ void GPSPort::setPowerSave(uint timeS)
     //         break;
     //     case 3600:
     //         pushMessage(UBLOX_PWR_SAVE_1HR, sizeof(UBLOX_PWR_SAVE_1HR));
-    //         break;
-    // }
-}
-
-void GPSPort::setSVChannels(uint channels)
-{
-    // switch (channels) {
-    //     case 8:
-    //         pushMessage(UBLOX_INIT_CHANNEL_8, sizeof(UBLOX_INIT_CHANNEL_8));
-    //         break;
-    //     case 12:
-    //         pushMessage(UBLOX_INIT_CHANNEL_12, sizeof(UBLOX_INIT_CHANNEL_12));
-    //         break;
-    //     case 16:
-    //         pushMessage(UBLOX_INIT_CHANNEL_16, sizeof(UBLOX_INIT_CHANNEL_16));
-    //         break;
-    //     default:
-    //         pushMessage(UBLOX_INIT_CHANNEL_ALL, sizeof(UBLOX_INIT_CHANNEL_ALL));
     //         break;
     // }
 }

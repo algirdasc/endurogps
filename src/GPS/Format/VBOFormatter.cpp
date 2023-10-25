@@ -17,8 +17,8 @@ bool VOBFormatter::write(File file, gps_fix gpsFix)
     sprintf(buffer, VBO_DATA_FORMAT,
         gpsFix.satellites,                      // Satellites   %i
         ts(gpsFix, VOBFormatter::duration()),   // UTC Time     %s
-        gpsFix.latitudeL() / rescaleGPS,        // Latitude     %.9f
-        gpsFix.longitudeL() / rescaleGPS,       // Longitude    %.9f
+        gpsFix.latitudeL() / RESCALE_GPS,       // Latitude     %.9f
+        gpsFix.longitudeL() / RESCALE_GPS,      // Longitude    %.9f
         gpsFix.speed_kph(),                     // Speed        %.1f
         gpsFix.heading(),                       // Heading      %.1f
         gpsFix.altitude(),                      // Altitude     %.1f

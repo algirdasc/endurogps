@@ -12,7 +12,7 @@
 #include "GPS/Formatter/TrackAddictCSVFormatter.h"
 #include "GPS/Formatter/VBOFormatter.h"
 
-class GPSLogProxy : public BaseProxy
+class SDCardProxy : public BaseProxy
 {
     private:
         NMEAGPS nmeaGps;
@@ -22,7 +22,7 @@ class GPSLogProxy : public BaseProxy
         bool isFileCreated = false;
         void handleGpsFix(gps_fix gpsFix);
     public:
-        GPSLogProxy();
+        SDCardProxy();
         
         void formatter(uint formatter);
         void start();

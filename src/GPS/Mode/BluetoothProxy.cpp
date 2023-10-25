@@ -1,11 +1,11 @@
-#include "GPS/Mode/GPSBTProxy.h"
+#include "GPS/Mode/BluetoothProxy.h"
 
-GPSBTProxy::GPSBTProxy()
+BluetoothProxy::BluetoothProxy()
 {
     BluetoothSerial serialBT;    
 }
 
-void GPSBTProxy::start()
+void BluetoothProxy::start()
 {
     uint16_t chip = (uint16_t)((uint64_t) ESP.getEfuseMac() >> 32);
     sprintf(deviceID, "%s-%04X", DEVICE_NAME, chip);
@@ -16,7 +16,7 @@ void GPSBTProxy::start()
     isStarted = true;
 }
 
-void GPSBTProxy::stop()
+void BluetoothProxy::stop()
 {
     serialBT.end();
     esp_bt_controller_disable();
@@ -25,7 +25,7 @@ void GPSBTProxy::stop()
     return;
 }
 
-void GPSBTProxy::handle(uint8_t *data, size_t size)
+void BluetoothProxy::handle(uint8_t *data, size_t size)
 {
     if (!isStarted) {
         return;
