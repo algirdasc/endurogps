@@ -1,3 +1,3 @@
 #pragma once
 
-const char HTML_INDEX[] PROGMEM = R"raw(<table><thead><tr><th></th><th></th></tr></thead><tbody><td><td>Mode:</td><td>%s</td></td><tr><td>IP</td><td>%s</td></tr></tbody></table><table class="pure-table"><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>CPU Freq</td><td>%u Mhz</td></tr><tr><td>Total heap</td><td>%u MB</td></tr><tr><td>Free heap</td><td>%u MB</td></tr><tr><td>Total PSRAM</td><td>%u MB</td></tr><tr><td>Free PSRAM</td><td>%u MB</td></tr></tbody></table>)raw";
+const char HTML_INDEX[] = R"raw(<table><thead><tr><th></th><th></th></tr></thead><tbody><td><td>Mode:</td><td>%s</td></td><tr><td>IP</td><td>%s</td></tr></tbody></table><table class="pure-table"><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>CPU Freq</td><td>%u Mhz</td></tr><tr><td>Total heap</td><td>%u MB</td></tr><tr><td>Free heap</td><td>%u MB</td></tr><tr><td>Total PSRAM</td><td>%u MB</td></tr><tr><td>Free PSRAM</td><td>%u MB</td></tr></tbody></table>)raw";

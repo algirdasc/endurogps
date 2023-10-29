@@ -1,8 +1,8 @@
 #include "GPS/Formatter/TrackAddictCSVFormatter.h"
 #include <NeoTime.h>
 
-const char CSV_FILE_FORMAT[] PROGMEM = "/Log-20%i%02d%02d-%02d%02d%02d EnduroGPS.csv";
-const char CSV_DATA_FORMAT[] PROGMEM = "%.3f,%s,%i,%.3f,%.9f,%.9f,%.1f,%i,%.1f,%.1f,%.1f";
+const char CSV_FILE_FORMAT[] = "/Log-20%i%02d%02d-%02d%02d%02d EnduroGPS.csv";
+const char CSV_DATA_FORMAT[] = "%.3f,%s,%i,%.3f,%.9f,%.9f,%.1f,%i,%.1f,%.1f,%.1f";
 
 void TrackAddictCSVFormatter::filepath(char *filePath, gps_fix gpsFix)
 {

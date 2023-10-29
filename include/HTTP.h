@@ -2,28 +2,20 @@
 
 #include <Arduino.h>
 #include <WebServer.h>
-#include "EnduroGPS.h"
+#include <FixedString.h>
 
-const char PLEASE_WAIT_PAGE_BASE_URL[] PROGMEM = "/device/please_wait";
+#include "HTTP/HTTPCodes.h"
+#include "HTTP/HTML.h"
 
-typedef std::function<void(void)> THandlerFunction;
 class HTTP
 {
-    public:
-        WebServer server;
+public:
+    static void redirect(WebServer &server, const char *uri)
+    {
+        FixedString128 content;
+        content.appendFormat(HTML_REDIRECT, uri, uri);
 
-        HTTP();
-        
-        // Control
-        void start();
-        void stop();
-        void handleClient();
-        void redirect(String uri);
-
-        // Handles
-        void notFound();
-        void pleaseWait();       
-
-        // Mirror functions.        
-        void on(const Uri &uri, THandlerFunction fn);
+        server.sendHeader(F("Location"), uri);
+        server.send(HTTP_CODE_REDIRECT, "text/html", content.c_str());
+    }
 };

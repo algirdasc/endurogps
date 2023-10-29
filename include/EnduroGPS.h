@@ -1,6 +1,5 @@
 // Wifi Settings
 #define DEVICE_NAME         "EnduroGPS"
-#define WIFI_AP_PASS        "endurogps815"
 #define WIFI_AP_MDNS        "endurogps.local"
 
 // Ports

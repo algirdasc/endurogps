@@ -14,34 +14,41 @@
 #define DEFAULT_PARAM_NMEA_TCP_ENABLED  false
 #define DEFAULT_PARAM_WIFI_MODE         PARAM_WIFI_MODE_AP
 #define DEFAULT_PARAM_WIFI_FALLBACK_AP  false
+#define DEFAULT_PARAM_WIFI_AP_NAME      ""
+#define DEFAULT_PARAM_WIFI_AP_PASS      "endurogps815"
+#define DEFAULT_PARAM_GPS_OPTIMIZE_FOR  GPS_OPTIMIZE_FOR_DEFAULT
 
-const char PARAM_PREFERENCES_NS[] PROGMEM = "endurogps";
+const char PARAM_PREFERENCES_NS[] = "endurogps";
 
-const char PARAM_GPS_MODE[] PROGMEM = "gpsMode";
-const char PARAM_GPS_LOG_FORMAT[] PROGMEM = "logFormat";
-const char PARAM_GPS_RATE_HZ[] PROGMEM = "gpsRateHz";
-const char PARAM_GPS_BAUD_RATE[] PROGMEM = "gpsBaudRate";
-const char PARAM_GPS_NMEA_TCP_ENABLED[] PROGMEM = "nmeaTcpEnabled";
-
-const char PARAM_WIFI_MODE_AP[] PROGMEM = "WIFI_AP";
-const char PARAM_WIFI_MODE_STA[] PROGMEM = "WIFI_STA";
-const char PARAM_WIFI_MODE_OFF[] PROGMEM = "WIFI_OFF";
-const char PARAM_WIFI_MODE[] PROGMEM = "wifiMode";
-const char PARAM_WIFI_STA_SSID[] PROGMEM = "wifiStaSsid";
-const char PARAM_WIFI_STA_PASS[] PROGMEM = "wifiStaPass";
-const char PARAM_WIFI_FALLBACK_AP[] PROGMEM = "wifiFallbackAp";
+const char PARAM_GPS_MODE[] = "gpsMode";
+const char PARAM_GPS_LOG_FORMAT[] = "logFormat";
+const char PARAM_GPS_RATE_HZ[] = "gpsRateHz";
+const char PARAM_GPS_BAUD_RATE[] = "gpsBaudRate";
+const char PARAM_GPS_NMEA_TCP_ENABLED[] = "nmeaTcpEnabled";
+const char PARAM_GPS_OPTIMIZE_FOR[] = "gpsOptimizeFor";
+const char PARAM_WIFI_MODE_AP[] = "WIFI_AP";
+const char PARAM_WIFI_MODE_STA[] = "WIFI_STA";
+const char PARAM_WIFI_MODE_OFF[] = "WIFI_OFF";
+const char PARAM_WIFI_MODE[] = "wifiMode";
+const char PARAM_WIFI_AP_SSID[] = "wifiApSsid";
+const char PARAM_WIFI_AP_PASS[] = "wifiApPass";
+const char PARAM_WIFI_STA_SSID[] = "wifiStaSsid";
+const char PARAM_WIFI_STA_PASS[] = "wifiStaPass";
+const char PARAM_WIFI_FALLBACK_AP[] = "wifiFallbackAp";
 
 struct StoredSettingsStruct
 {
     WiFiMode_t wifiMode;
     String wifiStaSsid;
     String wifiStaPass;
+    String wifiApPass;
+    String wifiApSsid;
     bool wifiFallbackAp;
          
     uint gpsMode;
     uint gpsRateHz;
     uint gpsBaudRate;
-
+    uint gpsOptimizeFor;
     uint logFormat;
 
     bool nmeaTcpEnabled;

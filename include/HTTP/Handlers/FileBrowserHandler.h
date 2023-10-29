@@ -3,27 +3,16 @@
 #include <SD.h>
 #include <WebServer.h>
 
-#include "HTTP/HTTPCodes.h"
-#include "HTTP/Template.h"
+#include "HTTP.h"
 
-const char FILEBROWSER_PAGE_BASE_URL[] PROGMEM = "/sdcard";
-const char FILEBROWSER_PAGE_TITLE[] PROGMEM = "File browser";
-const char FILEBROWSER_PAGE_404_ERROR[] PROGMEM = "SD Card is unavailable or path does not exist";
-const char FILEBROWSER_PAGE_TABLE_HEADER_TEMPLATE[] PROGMEM = R"raw(
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th></th>
-                <th>Filename</th>
-                <th class="text-right">Size</th>
-                <th class="text-right">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-)raw";
-const char FILEBROWSER_PAGE_TABLE_FOOTER_TEMPLATE[] PROGMEM = R"raw(</tbody></table></div></div>)raw";
-const char FILEBROWSER_PAGE_TABLE_EMPTY_DIR_ROW[] PROGMEM = R"raw(<tr><td class="text-center" colspan="100">Directory is empty</td></tr>)raw";
-const char FILEBROWSER_PAGE_TABLE_ROW[] PROGMEM = R"raw(<tr><td>[%s]</td><td><a href="%s">%s</a></td><td class="text-right">%s</td><td class="text-right"><a href="%s?delete=1" class="btn btn-xs btn-danger" onclick="confirm('Are you sure you want to delete this item?');">Delete</a></td></tr>)raw";
+const char FILEBROWSER_PAGE_BASE_URL[] = "/sdcard";
+const char FILEBROWSER_PAGE_TITLE[] = R"raw(<div class="page-header"><h1>File browser</h1></div>)raw";
+const char FILEBROWSER_PAGE_404_ERROR[] = R"raw(<div class="alert alert-danger">SD Card is unavailable or path does not exist</div>)raw";
+const char FILEBROWSER_PAGE_TABLE_HEADER_TEMPLATE[] = R"raw(<table class="table table-striped"><thead><tr><th></th><th>Filename</th><th class="text-center">Size</th><th class="text-right">Actions</th></tr></thead><tbody>)raw";
+const char FILEBROWSER_PAGE_TABLE_FOOTER_TEMPLATE[] = R"raw(</tbody><tfoot><tr><th colspan="100" class="text-right text-muted">Used: %llu MB / %llu MB</th></tr></tfoot></table></div></div>)raw";
+const char FILEBROWSER_PAGE_TABLE_EMPTY_DIR_ROW[] = R"raw(<tr><td class="text-center" colspan="100">Directory is empty</td></tr>)raw";
+const char FILEBROWSER_PAGE_TABLE_SUBDIR_ROW[] = R"raw(<tr><td><a href="%s"><span class="icon folder-open"></span></a></td><td colspan="100"><a href="%s">Back</a></td></tr>)raw";
+const char FILEBROWSER_PAGE_TABLE_ROW[] = R"raw(<tr><td>[%s]</td><td><a href="%s">%s</a></td><td class="text-center">%s</td><td class="text-right"><a href="%s?delete=1" class="btn btn-xs btn-danger" onclick="confirm('Are you sure you want to delete this item?');">Delete</a></td></tr>)raw";
 
 class FileBrowserHandler : public RequestHandler
 {
@@ -45,8 +34,7 @@ public:
 
         if (!SD.exists(sdCardPath))
         {
-            server.send(HTTP_CODE_NOT_FOUND, contentTypeHtml,
-                        Template::generateBody("", FILEBROWSER_PAGE_TITLE, FILEBROWSER_PAGE_404_ERROR));
+            displayPathNotFound(server);
 
             return true;
         }
@@ -56,19 +44,18 @@ public:
         {
             entry.isDirectory() ? SD.rmdir(sdCardPath) : SD.remove(sdCardPath);
 
-            Template::redirect(server, absoluteUrl(parentDir(entry.path())));
+            HTTP::redirect(server, relativeUrl(parentDir(entry.path())));
 
             return true;
         }
 
         if (entry.isDirectory())
         {
-            server.send(HTTP_CODE_OK, contentTypeHtml,
-                        Template::generateBody(directoryHtmlTable(entry), FILEBROWSER_PAGE_TITLE, entry.path()));
+            displayDirectoryHtmlTable(server, entry);
         }
         else
         {
-            size_t sent = server.streamFile(entry, contentTypeStream);
+            size_t sent = server.streamFile(entry, "application/stream");
         }
 
         entry.close();
@@ -77,7 +64,7 @@ public:
     }
 
 private:
-    char *bytesToHumanReadable(size_t size)
+    const char *bytesToHumanReadable(size_t size)
     {
         const char *suffix[5] = {"B", "KB", "MB", "GB", "TB"};
 
@@ -91,42 +78,68 @@ private:
             }
         }
 
-        static char output[128];
-        sprintf(output, "%.02lf %s", dblBytes, suffix[i]);
+        FixedString16 output;
+        output.appendFormat("%.02lf %s", dblBytes, suffix[i]);
 
-        return output;
+        return output.c_str();
     }
 
-    String absoluteUrl(String path)
+    const char *relativeUrl(const char *path)
     {
-        return String(FILEBROWSER_PAGE_BASE_URL) + path;
+        FixedString128 relativeUrl;
+        relativeUrl.appendFormat("%s%s", FILEBROWSER_PAGE_BASE_URL, path);
+
+        return relativeUrl.c_str();
     }
 
-    String parentDir(String path)
+    const char *parentDir(const char *path)
     {
-        int index = path.lastIndexOf("/");
-
-        return path.substring(0, index);
-    }
-
-    String directoryHtmlTable(File dir)
-    {
-        String parentUrl = absoluteUrl(parentDir(dir.path()));
-        String table = FILEBROWSER_PAGE_TABLE_HEADER_TEMPLATE;
-
-        if (!String(dir.path()).equalsIgnoreCase("/"))
+        char parentPath[128] = "";
+        uint lastSlash = strrchr(path, '/') - path;
+        if (lastSlash == 0)
         {
-            table += R"raw(
-                    <tr>
-                        <td>                    
-                            <a href=")raw" +
-                     parentUrl + R"raw("><span class="icon folder-open"></span></a>
-                        </td>
-                        <td colspan="100">
-                            <a href=")raw" +
-                     parentUrl + R"raw(">Back</a>
-                        </td>
-                    </tr>)raw";
+            lastSlash++;
+        }
+        strncat(parentPath, path, lastSlash);
+
+        FixedString128 parentDir = parentPath;
+
+        return parentDir.c_str();
+    }
+
+    void displayPathNotFound(WebServer &server)
+    {
+        server.sendContent(HTML_HEADER);
+        server.sendContent(FILEBROWSER_PAGE_TITLE);
+        server.sendContent(FILEBROWSER_PAGE_404_ERROR);
+        server.sendContent(HTML_FOOTER);
+    }
+
+    void displayDirectoryHtmlTable(WebServer &server, File dir)
+    {
+        FixedString128 parentUrl = relativeUrl(parentDir(dir.path()));
+
+        server.sendContent(HTML_HEADER);
+        server.sendContent(FILEBROWSER_PAGE_TITLE);
+        server.sendContent(R"raw(<ol class="breadcrumb">)raw");
+        server.sendContent(HTML::breadcrumb(FILEBROWSER_PAGE_BASE_URL, "Home", false));
+
+        char *pch = strtok((char *)dir.path(), "/");
+        while (pch != NULL)
+        {
+            server.sendContent(HTML::breadcrumb(relativeUrl(pch), pch, false));
+            pch = strtok(NULL, "/");
+        }
+
+        server.sendContent("</ol>");
+        server.sendContent(FILEBROWSER_PAGE_TABLE_HEADER_TEMPLATE);
+
+        if (strcmp(dir.path(), "/") != 0)
+        {
+            FixedString512 tableRow;
+            tableRow.appendFormat(FILEBROWSER_PAGE_TABLE_SUBDIR_ROW, parentUrl.c_str(), parentUrl.c_str());
+
+            server.sendContent(tableRow.c_str());
         }
 
         uint fileCount = 0;
@@ -137,31 +150,32 @@ private:
             {
                 if (fileCount == 0)
                 {
-                    table += FILEBROWSER_PAGE_TABLE_EMPTY_DIR_ROW;
+                    server.sendContent(FILEBROWSER_PAGE_TABLE_EMPTY_DIR_ROW);
                 }
 
                 break;
             }
 
-            fileCount++;
+            const char *entryRelativeUrl = relativeUrl(entry.path());
 
-            String entryAbsoluteUrl = absoluteUrl(entry.path());
+            FixedString512 tableRow;
+            tableRow.appendFormat(FILEBROWSER_PAGE_TABLE_ROW,
+                                  entry.isDirectory() ? "DIR" : "FILE",
+                                  entryRelativeUrl,
+                                  entry.name(),
+                                  entry.isDirectory() ? "" : bytesToHumanReadable(entry.size()),
+                                  entryRelativeUrl);
 
-            char tableRow[512];
-            sprintf(tableRow, FILEBROWSER_PAGE_TABLE_ROW,
-                    entry.isDirectory() ? "DIR" : "FILE",
-                    entryAbsoluteUrl.c_str(),
-                    entry.name(),
-                    entry.isDirectory() ? "" : bytesToHumanReadable(entry.size()),
-                    entryAbsoluteUrl.c_str());
-
-            table += String(tableRow);
+            server.sendContent(tableRow.c_str());
 
             entry.close();
+            fileCount++;
         }
 
-        table += FILEBROWSER_PAGE_TABLE_FOOTER_TEMPLATE;
+        FixedString256 tableFooter;
+        tableFooter.appendFormat(FILEBROWSER_PAGE_TABLE_FOOTER_TEMPLATE, SD.usedBytes() / 1048576, SD.cardSize() / 1048576);
+        server.sendContent(tableFooter.c_str());
 
-        return table;
+        server.sendContent(HTML_FOOTER);
     }
 };

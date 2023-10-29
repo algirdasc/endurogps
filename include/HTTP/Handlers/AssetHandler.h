@@ -1,7 +1,6 @@
 #pragma once
 
 #include <WebServer.h>
-#include "HTTP/Template.h"
 #include "HTTP/HTTPCodes.h"
 #include "HTTP/Assets/CSS/Style.h"
 // #include "HTTP/Assets/JS/Script.h"
@@ -18,9 +17,9 @@ public:
     {
         server.sendHeader("Cache-Control", "max-age=86400");
 
-        if (requestUri == "/css/style.css")
+        if (requestUri.equals("/css/style.css"))
         {
-            server.send_P(HTTP_CODE_OK, contentTypeCss, CSS_STYLE);
+            server.send_P(HTTP_CODE_OK, "text/css", CSS_STYLE);
         }
 
         // if (requestUri == "/js/script.css") {

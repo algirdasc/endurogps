@@ -11,11 +11,11 @@ AsyncServer *server = new AsyncServer(NMEA_PORT);
 GPSPort gpsPort;
 Params params;
 Battery battery;
-HTTP http;
+WebServer webserver;
 BluetoothProxy gpsBTProxy;
 SDCardProxy gpsSDCardProxy;
 
-static std::vector<AsyncClient*> NMEAClients;
+static std::vector<AsyncClient *> NMEAClients;
 
 void ledBlink()
 {
@@ -24,26 +24,28 @@ void ledBlink()
 Task taskStatusLedBlink(0, TASK_FOREVER, &ledBlink, &ts, false);
 
 void gpsInitialize()
-{    
+{
     gpsPort.initialize();
     gpsPort.setRefreshRate(params.storage.gpsRateHz);
     gpsPort.setBaudrate(params.storage.gpsBaudRate);
+    gpsPort.optimizeFor(params.storage.gpsOptimizeFor);
 }
 
 void startRecording()
 {
     gpsPort.start();
 
-    switch (params.storage.gpsMode) {
-        case GPS_MODE_BT:
-            gpsBTProxy.start();
-            break;
-        case GPS_MODE_SDCARD:
-            gpsSDCardProxy.formatter(params.storage.logFormat);
-            gpsSDCardProxy.start();
-            break;
+    switch (params.storage.gpsMode)
+    {
+    case GPS_MODE_BT:
+        gpsBTProxy.start();
+        break;
+    case GPS_MODE_SDCARD:
+        gpsSDCardProxy.formatter(params.storage.logFormat);
+        gpsSDCardProxy.start();
+        break;
     }
-    
+
     taskStatusLedBlink.enable();
 
     isRecording = true;
@@ -52,8 +54,8 @@ void startRecording()
 void stopRecording()
 {
     gpsBTProxy.stop();
-    gpsSDCardProxy.stop();    
-       
+    gpsSDCardProxy.stop();
+
     taskStatusLedBlink.disable();
     statusLed.off();
 
@@ -61,23 +63,27 @@ void stopRecording()
 }
 
 static void NMEAClientReply(uint8_t *data, size_t size)
-{    
-    for (uint i = 0; i < NMEAClients.size(); i++) {
-        if (NMEAClients[i]->space() > size && NMEAClients[i]->canSend()) {
-            NMEAClients[i]->write((char *) data, size);
+{
+    for (uint i = 0; i < NMEAClients.size(); i++)
+    {
+        if (NMEAClients[i]->space() > size && NMEAClients[i]->canSend())
+        {
+            NMEAClients[i]->write((char *)data, size);
         }
     }
 }
 
-static void NMEAHandleClientData(void *arg, AsyncClient *client, void *data, size_t len) 
+static void NMEAHandleClientData(void *arg, AsyncClient *client, void *data, size_t len)
 {
-    GPSSerial.write((uint8_t*) data, len);
+    GPSSerial.write((uint8_t *)data, len);
 }
 
 static void NMEAHandleClientDisconnect(void *arg, AsyncClient *client)
 {
-    for (uint i = 0; i < NMEAClients.size(); i++) {
-        if (NMEAClients[i]->disconnected()) {
+    for (uint i = 0; i < NMEAClients.size(); i++)
+    {
+        if (NMEAClients[i]->disconnected())
+        {
             NMEAClients.erase(NMEAClients.begin() + i);
         }
     }
@@ -98,61 +104,30 @@ void NMEAServerStart()
     server->setNoDelay(true);
 }
 
-void NMEAServerStop() 
+void NMEAServerStop()
 {
     server->end();
 }
 
-void handleGPSPort()
+void HTTPNotFound() 
 {
-    size_t len = GPSSerial.available();
-    if (!len) {
-        return;
-    }
-
-    uint8_t buf[len];
-    GPSSerial.readBytes(buf, len);
-
-    if (server->status() == 1) {
-        NMEAClientReply(buf, len);
-    }
-
-    switch (params.storage.gpsMode) {
-        case GPS_MODE_BT:
-            gpsBTProxy.handle(buf, len);
-            break;
-        case GPS_MODE_SDCARD:
-            gpsSDCardProxy.handle(buf, len);
-            break;
-    }  
+    webserver.send(HTTP_CODE_NOT_FOUND, "text/html", "<h1> 404 Not found</h1><p>The requested resource was not found on this server.</p>");
 }
 
-void wifiSetMode(WiFiMode_t mode)
+void HTTPRestart()
 {
-    wifiMode.setMode(mode);
-
-    if (mode == WIFI_OFF) {
-        NMEAServerStop();
-        http.stop();
-    } else {
-        if (params.storage.nmeaTcpEnabled) {
-            NMEAServerStart();
-        }
-
-        http.start();
-    }    
-}
-
-void restart()
-{
-    Template::redirect(http.server, PLEASE_WAIT_PAGE_BASE_URL);
+    webserver.sendContent(HTML_HEADER);
+    webserver.sendContent(R"raw(<div class="page-header"><h1>Restart</h1></div><div class="alert alert-info">Device is rebooting...</div>)raw");
+    webserver.sendContent(HTML_FOOTER);
 
     esp_restart();
 }
 
-void powerOff()
+void HTTPPowerOff()
 {
-    Template::redirect(http.server, PLEASE_WAIT_PAGE_BASE_URL);
+    webserver.sendContent(HTML_HEADER);
+    webserver.sendContent(R"raw(<div class="page-header"><h1>Power off</h1></div><div class="alert alert-info">Device is powering off...</div>)raw");
+    webserver.sendContent(HTML_FOOTER);
 
     stopRecording();
     // wifiSetMode(WIFI_OFF);
@@ -168,28 +143,100 @@ void powerOff()
     esp_deep_sleep_start();
 }
 
+void HTTPServerStart()
+{
+    webserver.onNotFound(HTTPNotFound);
+    
+    webserver.on("/device/poweroff", HTTPPowerOff);
+    webserver.on("/device/restart", HTTPRestart);
+
+    webserver.on("/device/recording/start", startRecording);
+    webserver.on("/device/recording/stop", stopRecording);
+
+    webserver.addHandler(new AssetHandler());
+    webserver.addHandler(new IndexHandler());
+    webserver.addHandler(new SettingsGPSHandler());        
+    webserver.addHandler(new SettingsWifiHandler());
+    webserver.addHandler(new FileBrowserHandler());
+
+    webserver.begin(HTTP_PORT);
+}
+
+void HTTPServerStop()
+{
+    webserver.stop();
+}
+
+void handleGPSPort()
+{
+    size_t len = GPSSerial.available();
+    if (!len)
+    {
+        return;
+    }
+
+    uint8_t buf[len];
+    GPSSerial.readBytes(buf, len);
+
+    if (server->status() == 1)
+    {
+        NMEAClientReply(buf, len);
+    }
+
+    switch (params.storage.gpsMode)
+    {
+    case GPS_MODE_BT:
+        gpsBTProxy.handle(buf, len);
+        break;
+    case GPS_MODE_SDCARD:
+        gpsSDCardProxy.handle(buf, len);
+        break;
+    }
+}
+
+void wifiSetMode(WiFiMode_t mode)
+{
+    wifiMode.setMode(mode);
+
+    if (mode == WIFI_OFF)
+    {
+        NMEAServerStop();
+        HTTPServerStop();
+    }
+    else
+    {
+        if (params.storage.nmeaTcpEnabled)
+        {
+            NMEAServerStart();
+        }
+
+        HTTPServerStart();
+    }
+}
+
 void buttonPressOneSec()
 {
     isRecording ? stopRecording() : startRecording();
 }
 
-void buttonPressTenSec() 
+void buttonPressTenSec()
 {
-    powerOff();
+    HTTPPowerOff();
 }
 
-void buttonPressFiveSec() 
+void buttonPressFiveSec()
 {
-    switch (wifiMode.currentMode) {
-        case WIFI_AP:
-            wifiSetMode(WIFI_STA);
-            break;
-        case WIFI_STA:
-            wifiSetMode(WIFI_OFF);
-            break;
-        case WIFI_OFF:
-            wifiSetMode(WIFI_AP);
-            break;
+    switch (wifiMode.currentMode)
+    {
+    case WIFI_AP:
+        wifiSetMode(WIFI_STA);
+        break;
+    case WIFI_STA:
+        wifiSetMode(WIFI_OFF);
+        break;
+    case WIFI_OFF:
+        wifiSetMode(WIFI_AP);
+        break;
     }
 }
 
@@ -209,21 +256,16 @@ void setup()
     // Initialize GPS
     gpsInitialize();
 
-    // Set wifi credentials
+    // Set wifi & bt credentials
     wifiMode.staSsid = params.storage.wifiStaSsid;
     wifiMode.staPass = params.storage.wifiStaPass;
+    wifiMode.apSsid = params.storage.wifiApSsid;
+    wifiMode.apPass = params.storage.wifiApPass;
     wifiMode.fallbackToAP = params.storage.wifiFallbackAp;
+    gpsBTProxy.btSsid = params.storage.wifiApSsid;
 
     // Start wifi & services
     wifiSetMode(params.storage.wifiMode);
-
-    // Bind some web functions
-    http.on(F("/device/poweroff"), powerOff);
-    http.on(F("/device/restart"), restart);
-
-    // TODO: remove?
-    http.on(F("/gps/start"), startRecording);
-    http.on(F("/gps/stop"), stopRecording);
 
     // Button control
     button.begin();
@@ -231,7 +273,6 @@ void setup()
     button.onPressedFor(3000, buttonPressFiveSec);
     button.onPressedFor(10000, buttonPressTenSec);
 
-    taskStatusLedBlink.setInterval(1000);    
     statusLed.off();
 
     // Dump information
@@ -240,12 +281,14 @@ void setup()
 }
 
 void loop()
-{    
+{
     handleGPSPort();
 
-    http.handleClient();
+    webserver.handleClient();
 
     button.read();
 
     ts.execute();
+
+    // log_i("Heap: %d / %d", ESP.getFreeHeap(), ESP.getHeapSize());
 }

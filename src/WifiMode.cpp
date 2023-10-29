@@ -6,14 +6,18 @@
 #include "WifiMode.h"
 
 WifiMode::WifiMode() {
-  uint16_t chip = (uint16_t)((uint64_t) ESP.getEfuseMac() >> 32);
-  sprintf(accessPointSSID, "%s-%04X", DEVICE_NAME, chip);
-
   WiFi.setHostname(WIFI_AP_MDNS);
 }
 
 void WifiMode::setMode(WiFiMode_t mode)
 {
+    if (apSsid.equals("")) {
+        char accessPointSSID[20];
+        uint16_t chip = (uint16_t)((uint64_t) ESP.getEfuseMac() >> 32);
+        sprintf(accessPointSSID, "%s-%04X", DEVICE_NAME, chip);
+        apSsid = String(accessPointSSID);
+    }
+
     if (mode == WIFI_STA) {                
         WifiMode::STA();
     } else if (mode == WIFI_AP) {
@@ -41,10 +45,7 @@ void WifiMode::AP()
 
     esp_wifi_set_country(&country);
 
-    WiFi.softAP(accessPointSSID, WIFI_AP_PASS, 1, 0, 2);
-    log_i("Wait 100 ms for AP_START...");
-    delay(100);
-    log_d("Power: %d", WiFi.getTxPower());
+    WiFi.softAP(apSsid, apPass, 1, 0, 2);
 
     IPAddress ip(10, 0, 0, 1);
     IPAddress netMask(255, 255, 255, 0);

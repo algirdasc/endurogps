@@ -4,9 +4,7 @@
 
 class WifiMode 
 {
-    private:        
-        char accessPointSSID[20];
-        
+    private:               
         void STA();
         void AP();
         void OFF();
@@ -18,6 +16,8 @@ class WifiMode
         bool fallbackToAP = false;
         String staSsid;
         String staPass;
+        String apSsid;
+        String apPass;
 
         void setMode(WiFiMode_t mode);
 };

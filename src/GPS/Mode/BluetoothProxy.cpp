@@ -1,5 +1,7 @@
 #include "GPS/Mode/BluetoothProxy.h"
 
+#define DEVICE_NAME_SIZE 20
+
 BluetoothProxy::BluetoothProxy()
 {
     BluetoothSerial serialBT;    
@@ -7,11 +9,8 @@ BluetoothProxy::BluetoothProxy()
 
 void BluetoothProxy::start()
 {
-    uint16_t chip = (uint16_t)((uint64_t) ESP.getEfuseMac() >> 32);
-    sprintf(deviceID, "%s-%04X", DEVICE_NAME, chip);
-
     esp_bt_controller_enable(ESP_BT_MODE_CLASSIC_BT);
-    serialBT.begin(deviceID);
+    serialBT.begin(btSsid);
 
     isStarted = true;
 }

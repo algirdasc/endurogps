@@ -21,14 +21,13 @@ def original_file(file_type, file_path):
 html_files = {
     "./assets/html/header.html": "HTML/Header.h",
     "./assets/html/footer.html": "HTML/Footer.h",
-    "./assets/html/index.html": "HTML/Index.h",
 }
 
 css_header_file = "CSS/Style.h"
-css_files = [
-    "./assets/css/style.css",
+css_files = [    
     "./assets/css/bootstrap.css",
     "./assets/css/navbar.css",
+    "./assets/css/style.css",
 ]
 
 js_header_file = "CSS/Style.h"
@@ -80,7 +79,7 @@ for html_file in temp_files["html"]:
         header_file = html_files[original_file("html", html_file)]        
         with open("{}/{}".format(assets_dir, header_file), "w") as header:
             header.write("#pragma once\n\n")
-            header.write("const char {}[] PROGMEM = R\"raw({})raw\";".format(variable_name(header_file), minified))
+            header.write("const char {}[] = R\"raw({})raw\";".format(variable_name(header_file), minified))
 
 
 css_file_content = ""
@@ -90,4 +89,4 @@ for css_file in temp_files["css"]:
 
 with open("{}/{}".format(assets_dir, css_header_file), "w") as header:
     header.write("#pragma once\n\n")
-    header.write("const char {}[] PROGMEM = R\"raw({})raw\";".format(variable_name(css_header_file), css_file_content))
+    header.write("const char {}[] = R\"raw({})raw\";".format(variable_name(css_header_file), css_file_content))

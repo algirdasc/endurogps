@@ -9,12 +9,13 @@
 class BluetoothProxy : public BaseProxy
 {
     private:
-        BluetoothSerial serialBT;
-        char deviceID[20];
+        BluetoothSerial serialBT;        
         bool isDeviceConnected = false;
 
-    public:
+    public:        
         BluetoothProxy();
+
+        String btSsid;
 
         void start();
         void stop();

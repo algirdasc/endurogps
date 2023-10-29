@@ -1,7 +1,7 @@
 #include "GPS/Formatter/VBOFormatter.h"
 
-const char VBO_FILE_FORMAT[] PROGMEM = "/Log-20%i%02d%02d-%02d%02d%02d.vbo";
-const char VBO_DATA_FORMAT[] PROGMEM = "%i %s %.9f %.9f %.1f %.1f %.1f %.1f";
+const char VBO_FILE_FORMAT[] = "/Log-20%i%02d%02d-%02d%02d%02d.vbo";
+const char VBO_DATA_FORMAT[] = "%i %s %.9f %.9f %.1f %.1f %.1f %.1f";
 
 void VOBFormatter::filepath(char *filePath, gps_fix gpsFix)
 {
@@ -34,7 +34,7 @@ bool VOBFormatter::write(File file, gps_fix gpsFix)
 
 void VOBFormatter::writeHeader(File file, gps_fix gpxFix)
 {
-    file.println(F("File created on 31/07/2006 at 09:55:20 'generated from the VBOX internal Real time clock'"));
+    file.println("File created on 31/07/2006 at 09:55:20 'generated from the VBOX internal Real time clock'");
     file.println();    
     file.println("[header]");
     file.println("Satellites");

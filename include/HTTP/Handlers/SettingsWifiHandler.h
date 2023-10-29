@@ -2,27 +2,25 @@
 
 #include <WiFi.h>
 #include <WebServer.h>
+#include <FixedString.h>
 
 #include "Params.h"
+#include "HTTP.h"
+#include "HTTP/HTML.h"
 #include "HTTP/HTTPCodes.h"
 
-const char WIFI_PAGE_BASE_URL[] PROGMEM = "/settings/wifi";
-const char WIFI_PAGE_WIFI_MODE[] PROGMEM = "Default wireless mode";
-const char WIFI_PAGE_WIFI_SSID[] PROGMEM = "Wireless network";
-const char WIFI_PAGE_FALLBACK_AP[] PROGMEM = "On connection failure, fallback to AP mode";
-
-const char *WIFI_PAGE_MODE_VALUES[] PROGMEM = {PARAM_WIFI_MODE_AP, PARAM_WIFI_MODE_STA, PARAM_WIFI_MODE_OFF};
-const char *WIFI_PAGE_MODE_LABELS[] PROGMEM = {"Access Point", "Client", "Off"};
+const char WIFI_PAGE_BASE_URL[] = "/settings/wifi";
 
 class SettingsWifiHandler : public RequestHandler
 {
 private:
     Params params;
+    FixedString128 toast;
 
 public:
     bool canHandle(HTTPMethod requestMethod, String requestUri)
     {
-        return requestUri == WIFI_PAGE_BASE_URL;
+        return requestUri.equals(WIFI_PAGE_BASE_URL);
     }
 
     bool handle(WebServer &server, HTTPMethod requestMethod, String requestUri)
@@ -34,53 +32,62 @@ public:
             return SettingsWifiHandler::handlePost(server, requestMethod, requestUri);
         }
 
-        String htmlOutput = HTML::formStart();
+        server.sendContent(HTML_HEADER);
+        server.sendContent(R"raw(<div class="page-header"><h1>WiFi Settings</h1></div>)raw");
 
-        htmlOutput += F(R"raw(<fieldset><legend>Settings</legend><div class="form-group">)raw");
-        htmlOutput += HTML::select(WIFI_PAGE_WIFI_MODE, PARAM_WIFI_MODE, WIFI_PAGE_MODE_VALUES, WIFI_PAGE_MODE_LABELS, 3, params.wifiMode(params.storage.wifiMode));
-        htmlOutput += F(R"raw(</div><div class="form-group">)raw");
-        htmlOutput += HTML::checkbox(WIFI_PAGE_FALLBACK_AP, PARAM_WIFI_FALLBACK_AP, params.storage.wifiFallbackAp);
-        htmlOutput += F(R"raw(</div></fieldset><fieldset><legend>Available networks <span class="pull-right">[<a href="/settings/wifi?scan=1">Scan</a>]</span></legend><div class="row"><div class="col-sm-6"><div class="form-group">)raw");
+        if (toast.length() > 0)
+        {
+            server.sendContent(toast.c_str());
+            toast.clear();
+        }
 
-        bool displaySsidInput = true;
+        server.sendContent(HTML_FORM_OPEN);
+        server.sendContent(R"raw(<fieldset><legend>WiFi Mode settings</legend><div class="form-group">)raw");
+
+        server.sendContent(HTML::select("Default WiFi mode", PARAM_WIFI_MODE));
+        server.sendContent(HTML::option(PARAM_WIFI_MODE_AP, "Access Point", params.storage.wifiMode == WIFI_MODE_AP));
+        server.sendContent(HTML::option(PARAM_WIFI_MODE_STA, "Client", params.storage.wifiMode == WIFI_MODE_STA));
+        server.sendContent(HTML::option(PARAM_WIFI_MODE_OFF, "Off", params.storage.wifiMode == WIFI_MODE_NULL));
+        server.sendContent(HTML_SELECT_CLOSE);
+
+        server.sendContent(R"raw(</div><div class="form-group">)raw");
+        server.sendContent(HTML::checkbox("On client mode connection failure, fallback to AP mode", PARAM_WIFI_FALLBACK_AP, params.storage.wifiFallbackAp));
+
+        server.sendContent(R"raw(</div></fieldset><fieldset><legend>Access Point Settings</legend><div class="row"><div class="col-sm-6"><div class="form-group">)raw");
+        server.sendContent(HTML::input("Access Point Name", PARAM_WIFI_AP_SSID, params.storage.wifiApSsid.c_str(), "text", 20, R"raw(pattern="[A-Za-z0-9\-_]+")raw"));
+        server.sendContent(R"raw(</div></div><div class="col-sm-6"><div class="form-group">)raw");
+        server.sendContent(HTML::input("Access Point Password", PARAM_WIFI_AP_PASS, params.storage.wifiApPass.c_str(), "password"));
+        server.sendContent(R"raw(</div></div></div></fieldset><fieldset><legend>Client Settings</legend><div class="row"><div class="col-sm-5 col-xs-9"><div class="form-group">)raw");
+
+        int availableWifiStations = -1;
         if (server.hasArg(F("scan")))
         {
-            uint availableWifiStations = WiFi.scanNetworks();
+            availableWifiStations = 0; //WiFi.scanNetworks();
             if (availableWifiStations > 0)
             {
-                displaySsidInput = false;
-                const char *wifiStationValues[availableWifiStations];
-                const char *wifiStationLabels[availableWifiStations];
-                for (int i = 0; i < availableWifiStations && i < 64; i++)
+                server.sendContent(HTML::select("Client Network Name", PARAM_WIFI_STA_SSID));
+                for (int i = 0; i < availableWifiStations; i++)
                 {
-                    wifiStationValues[i] = WiFi.SSID(i).c_str();
-
-                    const char *label[48]; // 32 + " (Secured)"
-                    sprintf(label, "%s%s", "DEFG", WiFi.encryptionType(i) != WIFI_AUTH_OPEN ? " (Secured)" : "");
-                    wifiStationLabels[i] = label;
-                }
-                htmlOutput += HTML::select(WIFI_PAGE_WIFI_SSID, PARAM_WIFI_STA_SSID, wifiStationValues, wifiStationLabels, availableWifiStations, params.storage.wifiStaSsid);
+                    server.sendContent(HTML::option(WiFi.SSID(i).c_str(), WiFi.SSID(i).c_str(), WiFi.SSID(i).equals(params.storage.wifiStaSsid)));
+                }                
+                server.sendContent(HTML_SELECT_CLOSE);
             } else {
-                // Template::message = String(F("No wifi networks found"));
-                // TODO: ^^
+                server.sendContent(R"raw(<div class="text-danger">No wireless networks found</div>)raw");
             }
 
             WiFi.scanDelete();
         }
 
-        if (displaySsidInput)
-        {
-            htmlOutput += HTML::input(WIFI_PAGE_WIFI_SSID, PARAM_WIFI_STA_SSID, params.storage.wifiStaSsid.c_str());
+        if (availableWifiStations <= 0) {
+            server.sendContent(HTML::input("Client Network Name", PARAM_WIFI_STA_SSID, params.storage.wifiStaSsid.c_str()));
         }
 
-        htmlOutput += F(R"raw(</div></div><div class="col-sm-6"><div class="form-group">)raw");
-        htmlOutput += HTML::input("Password", PARAM_WIFI_STA_PASS, params.storage.wifiStaPass.c_str(), "password");
-        htmlOutput += F("</div></div></div></fieldset>");
+        server.sendContent(R"raw(</div></div><div class="col-sm-1 col-xs-3"><div class="form-group"><label>&nbsp;</label><a class="btn btn-info block" href="/settings/wifi?scan=1">Scan</a></div></div><div class="col-sm-6"><div class="form-group">)raw");
+        server.sendContent(HTML::input("Client Network Password", PARAM_WIFI_STA_PASS, params.storage.wifiStaPass.c_str(), "password"));
+        server.sendContent("</div></div></div></fieldset>");
 
-        htmlOutput += HTML::formEnd();
-
-        server.send(HTTP_CODE_OK, contentTypeHtml,
-                    Template::generateBody(htmlOutput, F("Wireless")));
+        server.sendContent(HTML_FORM_CLOSE);
+        server.sendContent(HTML_FOOTER);
 
         return true;
     }
@@ -89,20 +96,16 @@ public:
     {
         params.storage.wifiMode = params.wifiMode(server.arg(PARAM_WIFI_MODE));
         params.storage.wifiFallbackAp = server.hasArg(PARAM_WIFI_FALLBACK_AP);
-
-        if (server.hasArg(PARAM_WIFI_STA_SSID))
-        {
-            params.storage.wifiStaSsid = server.arg(PARAM_WIFI_STA_SSID);
-        }
-
-        if (server.hasArg(PARAM_WIFI_STA_PASS))
-        {
-            params.storage.wifiStaPass = server.arg(PARAM_WIFI_STA_PASS);
-        }
+        params.storage.wifiApSsid = server.arg(PARAM_WIFI_AP_SSID);
+        params.storage.wifiApPass = server.arg(PARAM_WIFI_AP_PASS);
+        params.storage.wifiStaSsid = server.arg(PARAM_WIFI_STA_SSID);
+        params.storage.wifiStaPass = server.arg(PARAM_WIFI_STA_PASS);
 
         params.save();
 
-        Template::redirect(server, WIFI_PAGE_BASE_URL);
+        toast.append(HTML_SETTINGS_SUCCESS);
+
+        HTTP::redirect(server, WIFI_PAGE_BASE_URL);
 
         return true;
     }
