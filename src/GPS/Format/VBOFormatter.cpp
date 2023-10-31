@@ -54,8 +54,7 @@ void VOBFormatter::writeHeader(File file, gps_fix gpsFix)
     snprintf(title, 256,
              "File created on %02d/%02d/20%02d at %02d:%02d:%02d",
              gpsFix.dateTime.date, gpsFix.dateTime.month, gpsFix.dateTime.year,
-             gpsFix.dateTime.hours, gpsFix.dateTime.minutes, gpsFix.dateTime.seconds,
-             gpsSessionName);
+             gpsFix.dateTime.hours, gpsFix.dateTime.minutes, gpsFix.dateTime.seconds);
 
     file.println(title);
     file.println();

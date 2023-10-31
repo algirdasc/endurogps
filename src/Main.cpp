@@ -3,7 +3,7 @@
 Scheduler ts;
 WifiMode wifiMode;
 EasyButton button(GPIO_BUTTON);
-LED statusLed(LED_BUILTIN);
+LED statusLed(GPIO_LED);
 SDCard sdCard;
 AsyncServer *server = new AsyncServer(NMEA_PORT);
 GPSPort gpsPort;
@@ -258,6 +258,9 @@ void buttonPressFiveSec()
         break;
     case WIFI_OFF:
         wifiSetMode(WIFI_AP);
+        break;
+    case WIFI_MODE_APSTA:
+    case WIFI_MODE_MAX:
         break;
     }
 }

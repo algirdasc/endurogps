@@ -32,7 +32,10 @@ public:
         }
 
         server.sendContent(HTML_HEADER);
-        server.sendContent(R"raw(<div class="page-header"><h1>GPS Settings</h1></div>)raw");
+        FixedString64 pageHeader;
+        pageHeader.appendFormat(HTML_PAGE_HEADER, "GPS Settings");
+
+        server.sendContent(pageHeader.c_str());
 
         if (toast.length() > 0)
         {

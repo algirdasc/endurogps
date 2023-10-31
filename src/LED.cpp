@@ -5,7 +5,7 @@ LED::LED(int GPIO)
     // Task LedBlinkTask(0, TASK_FOREVER, &LED::blink, &ts, false);
 
     LED::GPIO = GPIO;    
-    pinMode(LED_BUILTIN, OUTPUT);
+    pinMode(GPIO, OUTPUT);
     // LED::LedBlinkTask = LedBlinkTask;
 }
 

@@ -15,6 +15,7 @@
 #define GPIO_BUTTON         GPIO_NUM_33
 #define GPIO_GPS_RX         GPIO_NUM_13
 #define GPIO_GPS_TX         GPIO_NUM_15
+#define GPIO_LED            GPIO_NUM_2
 
 // Serial
 #define LOG_BAUD_RATE       115200

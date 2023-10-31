@@ -19,7 +19,7 @@ size_t TrackAddictCSVFormatter::write(File file, gps_fix gpsFix)
     snprintf(buffer, 2048,
              "%.3f,%s,%i,%.3f,%.9f,%.9f,%.1f,%i,%.1f,%.1f,%.1f",
              duration,                          // Time                     %.3f
-             ts(gpsFix, duration),              // UTC Time                 %s
+             "oops",                            // UTC Time                 %s
              1,                                 // GPS Update               %i
              (float)gpsFix.dateTime_cs / 1000,  // GPS Delay                %.3f
              gpsFix.latitudeL() / RESCALE_GPS,  // Latitude                 %.9f

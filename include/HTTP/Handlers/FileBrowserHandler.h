@@ -6,7 +6,6 @@
 #include "HTTP.h"
 
 const char FILEBROWSER_PAGE_BASE_URL[] = "/sdcard";
-const char FILEBROWSER_PAGE_TITLE[] = R"raw(<div class="page-header"><h1>File browser</h1></div>)raw";
 const char FILEBROWSER_PAGE_TABLE_HEADER_TEMPLATE[] = R"raw(<table class="table table-striped"><thead><tr><th></th><th>Filename</th><th class="text-center">Size</th><th class="text-right">Actions</th></tr></thead><tbody>)raw";
 const char FILEBROWSER_PAGE_TABLE_FOOTER_TEMPLATE[] = R"raw(</tbody><tfoot><tr><th colspan="100" class="text-right text-muted">Used: %llu MB / %llu MB</th></tr></tfoot></table></div></div>)raw";
 const char FILEBROWSER_PAGE_TABLE_EMPTY_DIR_ROW[] = R"raw(<tr><td class="text-center" colspan="100">Directory is empty</td></tr>)raw";
@@ -15,7 +14,6 @@ const char FILEBROWSER_PAGE_TABLE_ROW[] = R"raw(<tr><td>[%s]</td><td><a href="%s
 
 class FileBrowserHandler : public RequestHandler
 {
-
 public:
     bool canHandle(HTTPMethod requestMethod, String requestUri)
     {
@@ -116,7 +114,11 @@ private:
     void displayError(WebServer &server, const char *error)
     {
         server.sendContent(HTML_HEADER);
-        server.sendContent(FILEBROWSER_PAGE_TITLE);
+        
+        FixedString64 pageHeader;
+        pageHeader.appendFormat(HTML_PAGE_HEADER, "File Browser");
+
+        server.sendContent(pageHeader.c_str());
         
         FixedString256 errorMessage;
         errorMessage.appendFormat(HTML_ALERT, error);
@@ -131,7 +133,12 @@ private:
         FixedString128 parentUrl = relativeUrl(parentDir(dir.path()));
 
         server.sendContent(HTML_HEADER);
-        server.sendContent(FILEBROWSER_PAGE_TITLE);
+        
+        FixedString64 pageHeader;
+        pageHeader.appendFormat(HTML_PAGE_HEADER, "File Browser");
+
+        server.sendContent(pageHeader.c_str());
+
         server.sendContent(R"raw(<ol class="breadcrumb">)raw");
         server.sendContent(HTML::breadcrumb(FILEBROWSER_PAGE_BASE_URL, "Home", false));
 

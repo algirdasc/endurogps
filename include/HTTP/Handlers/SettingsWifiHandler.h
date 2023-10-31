@@ -33,7 +33,11 @@ public:
         }
 
         server.sendContent(HTML_HEADER);
-        server.sendContent(R"raw(<div class="page-header"><h1>WiFi Settings</h1></div>)raw");
+        
+        FixedString64 pageHeader;
+        pageHeader.appendFormat(HTML_PAGE_HEADER, "WiFi Settings");
+
+        server.sendContent(pageHeader.c_str());
 
         if (toast.length() > 0)
         {
@@ -47,7 +51,8 @@ public:
         server.sendContent(HTML::select("Default WiFi mode", PARAM_WIFI_MODE));
         server.sendContent(HTML::option(PARAM_WIFI_MODE_AP, "Access Point", params.storage.wifiMode == WIFI_MODE_AP));
         server.sendContent(HTML::option(PARAM_WIFI_MODE_STA, "Client", params.storage.wifiMode == WIFI_MODE_STA));
-        server.sendContent(HTML::option(PARAM_WIFI_MODE_OFF, "Off", params.storage.wifiMode == WIFI_MODE_NULL));
+        // TODO: enable when button will be implemented
+        // server.sendContent(HTML::option(PARAM_WIFI_MODE_OFF, "Off", params.storage.wifiMode == WIFI_MODE_NULL));
         server.sendContent(HTML_SELECT_CLOSE);
 
         server.sendContent(R"raw(</div><div class="form-group">)raw");

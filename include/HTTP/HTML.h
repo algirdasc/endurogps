@@ -10,6 +10,7 @@
 #include "HTTP/Assets/HTML/Header.h"
 #include "HTTP/Assets/HTML/Footer.h"
 
+const char HTML_PAGE_HEADER[] = R"raw(<div class="page-header"><h1>%s</h1></div>)raw";
 const char HTML_FORM_OPEN[] = R"raw(<form method="POST">)raw";
 const char HTML_FORM_CLOSE[] = R"raw(<button type="submit" class="btn btn-primary">Save</button></form>)raw";
 const char HTML_CHECKBOX[] = R"raw(<div class="checkbox"><label for="ch_%s" class="pure-checkbox"><input type="checkbox" id="ch_%s" name="%s" value="1" %s /> %s</label></div>)raw";
