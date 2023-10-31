@@ -16,7 +16,7 @@ public:
     {
         Battery battery;
 
-        server.sendContent(HTML_HEADER);
+        HTTP::beginPage(server);
 
         FixedString64 pageHeader;
         pageHeader.appendFormat(HTML_PAGE_HEADER, "Device Status");
@@ -68,8 +68,7 @@ public:
 
         server.sendContent(R"raw(</dl></div></div>)raw");
 
-        server.sendContent(HTML::js());
-        server.sendContent(HTML_FOOTER);
+        HTTP::endPage(server);
 
         return true;
     }

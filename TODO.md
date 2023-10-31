@@ -1,12 +1,13 @@
 # TODO List
 
 - [x] TODO: Create Index page
-- [ ] TODO: Fix javascript & minimize css (responsive)
+- [x] TODO: Fix JavaScript
 - [ ] TODO: Fix TrackAddict Logging
-- [ ] TODO: migrate to esp-idf
-- [ ] TODO: optimize UBLOX parsing in NeoGPS
+- [ ] TODO: Migrate to esp-idf
+- [ ] TODO: Optimize UBLOX parsing in NeoGPS
 - [ ] TODO: Refactor GPS settings to Presets
-- [ ] TODO: device powersave mode
+- [ ] TODO: Minimize Bootstrap CSS
+- [ ] TODO: GPS Device PowerSave mode
 - [x] TODO: Fix VBO Logging
 - [x] TODO: Set session name via WEB & add it to filename
 - [x] TODO: Fix bluetooth proxy

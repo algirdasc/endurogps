@@ -113,7 +113,7 @@ private:
 
     void displayError(WebServer &server, const char *error)
     {
-        server.sendContent(HTML_HEADER);
+        HTTP::beginPage(server);
         
         FixedString64 pageHeader;
         pageHeader.appendFormat(HTML_PAGE_HEADER, "File Browser");
@@ -124,15 +124,15 @@ private:
         errorMessage.appendFormat(HTML_ALERT, error);
 
         server.sendContent(errorMessage.c_str());
-        server.sendContent(HTML::js());
-        server.sendContent(HTML_FOOTER);
+        
+        HTTP::endPage(server);
     }
 
     void displayDirectoryHtmlTable(WebServer &server, File dir)
     {
         FixedString128 parentUrl = relativeUrl(parentDir(dir.path()));
 
-        server.sendContent(HTML_HEADER);
+        HTTP::beginPage(server);
         
         FixedString64 pageHeader;
         pageHeader.appendFormat(HTML_PAGE_HEADER, "File Browser");
@@ -193,7 +193,7 @@ private:
         FixedString256 tableFooter;
         tableFooter.appendFormat(FILEBROWSER_PAGE_TABLE_FOOTER_TEMPLATE, SD.usedBytes() / 1048576, SD.cardSize() / 1048576);
         server.sendContent(tableFooter.c_str());
-        server.sendContent(HTML::js());
-        server.sendContent(HTML_FOOTER);
+        
+        HTTP::endPage(server);
     }
 };

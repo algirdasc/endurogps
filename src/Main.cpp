@@ -142,10 +142,10 @@ void HTTPNotFound()
 
 void HTTPPleaseWait()
 {
-    webserver.sendContent(HTML_HEADER);
+    HTTP::beginPage(webserver);
     webserver.sendContent(R"raw(<div class="page-header"><h1>Please wait</h1></div><div class="alert alert-info">Device is busy... Redirect after <span id="rt">15</span> s.</div>)raw");
     webserver.sendContent(R"raw(<script>var time = 15;var timer = setInterval(function(){time--;document.getElementById("rt").innerHTML=time;if(time == 0){window.location.pathname='/';clearInterval(timer);}},1000);</script>)raw");
-    webserver.sendContent(HTML_FOOTER);
+    HTTP::endPage(webserver);
 }
 
 void HTTPRestart()

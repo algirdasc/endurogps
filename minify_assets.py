@@ -91,6 +91,9 @@ for css_file in temp_files["css"]:
 with open("{}/{}".format(assets_dir, css_header_file), "w") as header:
     header.write("#pragma once\n\n")
     header.write("const char {}[] = R\"raw({})raw\";".format(variable_name(css_header_file), css_file_content))
+    
+with open("./.tmp/assets/css/_full.css", "w") as full:
+    full.write(css_file_content)
 
 js_file_content = ""
 for js_file in temp_files["js"]:

@@ -32,7 +32,7 @@ public:
             return SettingsWifiHandler::handlePost(server, requestMethod, requestUri);
         }
 
-        server.sendContent(HTML_HEADER);
+        HTTP::beginPage(server);
         
         FixedString64 pageHeader;
         pageHeader.appendFormat(HTML_PAGE_HEADER, "WiFi Settings");
@@ -87,13 +87,13 @@ public:
             server.sendContent(HTML::input("Client Network Name", PARAM_WIFI_STA_SSID, params.storage.wifiStaSsid.c_str()));
         }
 
-        server.sendContent(R"raw(</div></div><div class="col-sm-1 col-xs-3"><div class="form-group"><label>&nbsp;</label><a class="btn btn-info block" href="/settings/wifi?scan=1">Scan</a></div></div><div class="col-sm-6"><div class="form-group">)raw");
+        server.sendContent(R"raw(</div></div><div class="col-sm-1 col-xs-3"><div class="form-group"><label>&nbsp;</label><a class="btn btn-info btn-block" href="/settings/wifi?scan=1">Scan</a></div></div><div class="col-sm-6"><div class="form-group">)raw");
         server.sendContent(HTML::input("Client Network Password", PARAM_WIFI_STA_PASS, params.storage.wifiStaPass.c_str(), "password"));
         server.sendContent("</div></div></div></fieldset>");
 
         server.sendContent(HTML_FORM_CLOSE);
-        server.sendContent(HTML::js());
-        server.sendContent(HTML_FOOTER);
+        
+        HTTP::endPage(server);
 
         return true;
     }

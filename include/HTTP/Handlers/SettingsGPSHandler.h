@@ -31,7 +31,8 @@ public:
             return handlePost(server, requestMethod, requestUri);
         }
 
-        server.sendContent(HTML_HEADER);
+        HTTP::beginPage(server);
+        
         FixedString64 pageHeader;
         pageHeader.appendFormat(HTML_PAGE_HEADER, "GPS Settings");
 
@@ -86,8 +87,8 @@ public:
         server.sendContent("</div></fieldset>");
 
         server.sendContent(HTML_FORM_CLOSE);
-        server.sendContent(HTML::js());
-        server.sendContent(HTML_FOOTER);
+        
+        HTTP::endPage(server);
 
         return true;
     }
