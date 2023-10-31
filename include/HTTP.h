@@ -18,4 +18,14 @@ public:
         server.sendHeader(F("Location"), uri);
         server.send(HTTP_CODE_REDIRECT, "text/html", content.c_str());
     }
+
+    static String escape(const char *userInput)
+    {
+        String escapedUserInput = userInput;
+
+        escapedUserInput.replace("'", "\\'");
+        escapedUserInput.replace("\"", "\\\"");
+
+        return escapedUserInput;
+    }
 };

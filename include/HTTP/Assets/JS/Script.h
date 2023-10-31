@@ -1,0 +1,3 @@
+#pragma once
+
+const char JS_SCRIPT[] = R"raw(var startRec=document.getElementById('start-rec');var stopRec=document.getElementById('stop-rec');stopRec.style.display=g_isRecording?'list-item':'none';startRec.style.display=g_isRecording?'none':'list-item';startRec.onclick=function(a){a.preventDefault();var b=prompt('Enter session name',g_sessionName);if(b!==null){var c=startRec.querySelector('a');window.location.href=c.href+'?sessionName='+b;}};)raw";

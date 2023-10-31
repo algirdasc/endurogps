@@ -101,33 +101,38 @@ void GPSPort::optimizeFor(uint app)
 {
     switch (app)
     {
-        case GPS_OPTIMIZE_FOR_TRACKADDICT:
-            // https://forum.hptuners.com/showthread.php?69123-Track-addict-external-GPS&highlight=gps
-            pushMessage(UBLOX_TRACKADDICT_CHANNELS, sizeof(UBLOX_TRACKADDICT_CHANNELS));
-            pushMessage(UBLOX_GxGLL_ON, sizeof(UBLOX_GxGLL_ON));
-            pushMessage(UBLOX_GxVTG_OFF, sizeof(UBLOX_GxVTG_OFF));
-            pushMessage(UBLOX_GxGSA_OFF, sizeof(UBLOX_GxGSA_OFF));
-            pushMessage(UBLOX_GxGSV_OFF, sizeof(UBLOX_GxGSV_OFF));
-            pushMessage(UBLOX_GxGBS_OFF, sizeof(UBLOX_GxGBS_OFF));
-            break;
-        case GPS_OPTIMIZE_FOR_RACECHRONO:
-            // https://racechrono.com/forum/discussion/comment/11252/#Comment_11252
-            // https://racechrono.com/forum/discussion/1421/best-settings-for-qstarz818xt
-            pushMessage(UBLOX_RACECHRONO_CHANNELS, sizeof(UBLOX_RACECHRONO_CHANNELS));
-            pushMessage(UBLOX_GxGLL_OFF, sizeof(UBLOX_GxGLL_OFF));
-            pushMessage(UBLOX_GxVTG_OFF, sizeof(UBLOX_GxVTG_OFF));
-            pushMessage(UBLOX_GxGSA_ON, sizeof(UBLOX_GxGSA_ON));
-            pushMessage(UBLOX_GxGSV_ON, sizeof(UBLOX_GxGSV_ON));
-            pushMessage(UBLOX_GxGBS_OFF, sizeof(UBLOX_GxGBS_OFF));
-            break;
-        case GPS_OPTIMIZE_FOR_RACETIME:
-            pushMessage(UBLOX_GxGLL_ON, sizeof(UBLOX_GxGLL_ON));
-            pushMessage(UBLOX_GxVTG_ON, sizeof(UBLOX_GxVTG_ON));
-            pushMessage(UBLOX_GxGSA_OFF, sizeof(UBLOX_GxGSA_OFF));
-            pushMessage(UBLOX_GxGSV_OFF, sizeof(UBLOX_GxGSV_OFF));
-            pushMessage(UBLOX_GxGBS_OFF, sizeof(UBLOX_GxGBS_OFF));
-            break;
-        default:
-            break;
+    case GPS_OPTIMIZE_FOR_TRACKADDICT:
+        // https://forum.hptuners.com/showthread.php?69123-Track-addict-external-GPS&highlight=gps
+        pushMessage(UBLOX_TRACKADDICT_CHANNELS, sizeof(UBLOX_TRACKADDICT_CHANNELS));
+        pushMessage(UBLOX_GxGLL_ON, sizeof(UBLOX_GxGLL_ON));
+        pushMessage(UBLOX_GxVTG_OFF, sizeof(UBLOX_GxVTG_OFF));
+        pushMessage(UBLOX_GxGSA_OFF, sizeof(UBLOX_GxGSA_OFF));
+        pushMessage(UBLOX_GxGSV_OFF, sizeof(UBLOX_GxGSV_OFF));
+        pushMessage(UBLOX_GxGBS_OFF, sizeof(UBLOX_GxGBS_OFF));
+        break;
+    case GPS_OPTIMIZE_FOR_RACECHRONO:
+        // https://racechrono.com/forum/discussion/comment/11252/#Comment_11252
+        // https://racechrono.com/forum/discussion/1421/best-settings-for-qstarz818xt
+        pushMessage(UBLOX_RACECHRONO_CHANNELS, sizeof(UBLOX_RACECHRONO_CHANNELS));
+        pushMessage(UBLOX_GxGLL_OFF, sizeof(UBLOX_GxGLL_OFF));
+        pushMessage(UBLOX_GxVTG_OFF, sizeof(UBLOX_GxVTG_OFF));
+        pushMessage(UBLOX_GxGSA_ON, sizeof(UBLOX_GxGSA_ON));
+        pushMessage(UBLOX_GxGSV_ON, sizeof(UBLOX_GxGSV_ON));
+        pushMessage(UBLOX_GxGBS_OFF, sizeof(UBLOX_GxGBS_OFF));
+        break;
+    case GPS_OPTIMIZE_FOR_RACETIME:
+        pushMessage(UBLOX_GxGLL_ON, sizeof(UBLOX_GxGLL_ON));
+        pushMessage(UBLOX_GxVTG_ON, sizeof(UBLOX_GxVTG_ON));
+        pushMessage(UBLOX_GxGSA_OFF, sizeof(UBLOX_GxGSA_OFF));
+        pushMessage(UBLOX_GxGSV_OFF, sizeof(UBLOX_GxGSV_OFF));
+        pushMessage(UBLOX_GxGBS_OFF, sizeof(UBLOX_GxGBS_OFF));
+        break;
+    default:
+        pushMessage(UBLOX_GxGLL_OFF, sizeof(UBLOX_GxGLL_OFF));
+        pushMessage(UBLOX_GxVTG_OFF, sizeof(UBLOX_GxVTG_OFF));
+        pushMessage(UBLOX_GxGSA_OFF, sizeof(UBLOX_GxGSA_OFF));
+        pushMessage(UBLOX_GxGSV_OFF, sizeof(UBLOX_GxGSV_OFF));
+        pushMessage(UBLOX_GxGBS_OFF, sizeof(UBLOX_GxGBS_OFF));
+        break;
     }
 }

@@ -83,6 +83,7 @@ public:
         server.sendContent("</div></fieldset>");
 
         server.sendContent(HTML_FORM_CLOSE);
+        server.sendContent(HTML::js());
         server.sendContent(HTML_FOOTER);
 
         return true;

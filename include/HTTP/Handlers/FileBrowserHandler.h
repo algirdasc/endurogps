@@ -7,7 +7,6 @@
 
 const char FILEBROWSER_PAGE_BASE_URL[] = "/sdcard";
 const char FILEBROWSER_PAGE_TITLE[] = R"raw(<div class="page-header"><h1>File browser</h1></div>)raw";
-const char FILEBROWSER_PAGE_404_ERROR[] = R"raw(<div class="alert alert-danger">SD Card is unavailable or path does not exist</div>)raw";
 const char FILEBROWSER_PAGE_TABLE_HEADER_TEMPLATE[] = R"raw(<table class="table table-striped"><thead><tr><th></th><th>Filename</th><th class="text-center">Size</th><th class="text-right">Actions</th></tr></thead><tbody>)raw";
 const char FILEBROWSER_PAGE_TABLE_FOOTER_TEMPLATE[] = R"raw(</tbody><tfoot><tr><th colspan="100" class="text-right text-muted">Used: %llu MB / %llu MB</th></tr></tfoot></table></div></div>)raw";
 const char FILEBROWSER_PAGE_TABLE_EMPTY_DIR_ROW[] = R"raw(<tr><td class="text-center" colspan="100">Directory is empty</td></tr>)raw";
@@ -32,9 +31,16 @@ public:
             sdCardPath = "/" + sdCardPath;
         }
 
+        if (!SD.begin()) 
+        {
+            displayError(server, "Failed to mount SD card!");
+
+            return true;
+        }
+
         if (!SD.exists(sdCardPath))
         {
-            displayPathNotFound(server);
+            displayError(server, "Path does not exist!");
 
             return true;
         }
@@ -107,11 +113,16 @@ private:
         return parentDir.c_str();
     }
 
-    void displayPathNotFound(WebServer &server)
+    void displayError(WebServer &server, const char *error)
     {
         server.sendContent(HTML_HEADER);
         server.sendContent(FILEBROWSER_PAGE_TITLE);
-        server.sendContent(FILEBROWSER_PAGE_404_ERROR);
+        
+        FixedString256 errorMessage;
+        errorMessage.appendFormat(HTML_ALERT, error);
+
+        server.sendContent(errorMessage.c_str());
+        server.sendContent(HTML::js());
         server.sendContent(HTML_FOOTER);
     }
 
@@ -175,7 +186,7 @@ private:
         FixedString256 tableFooter;
         tableFooter.appendFormat(FILEBROWSER_PAGE_TABLE_FOOTER_TEMPLATE, SD.usedBytes() / 1048576, SD.cardSize() / 1048576);
         server.sendContent(tableFooter.c_str());
-
+        server.sendContent(HTML::js());
         server.sendContent(HTML_FOOTER);
     }
 };

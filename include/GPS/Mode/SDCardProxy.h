@@ -4,7 +4,6 @@
 #include <NMEAGPS.h>
 #include <SD.h>
 
-#include "EnduroGPS.h"
 #include "Params.h"
 
 #include "GPS/Mode/BaseProxy.h"
@@ -19,12 +18,12 @@ class SDCardProxy : public BaseProxy
         gps_fix gpsFix;
         BaseFormatter *logFormatter;
         File logFile;        
-        bool isFileCreated = false;
+        bool isProxyFileCreated = false;
         void handleGpsFix(gps_fix gpsFix);
     public:
         SDCardProxy();
-        
-        void formatter(uint formatter);
+
+        void formatter(uint formatter, const char *gpsSessionName);
         void start();
         void stop();
         void handle(uint8_t *data, size_t size);

@@ -1,7 +1,5 @@
 #include "Main.h"
 
-bool isRecording = false;
-
 Scheduler ts;
 WifiMode wifiMode;
 EasyButton button(GPIO_BUTTON);
@@ -17,11 +15,12 @@ SDCardProxy gpsSDCardProxy;
 
 static std::vector<AsyncClient *> NMEAClients;
 
-void ledBlink()
+void tledBlink()
 {
     statusLed.toggle();
 }
-Task taskStatusLedBlink(0, TASK_FOREVER, &ledBlink, &ts, false);
+Task taskStatusLedBlink(1000, TASK_FOREVER, &tledBlink, &ts, false);
+Task taskReboot(0, TASK_ONCE, &esp_restart, &ts, false);
 
 void gpsInitialize()
 {
@@ -41,14 +40,22 @@ void startRecording()
         gpsBTProxy.start();
         break;
     case GPS_MODE_SDCARD:
-        gpsSDCardProxy.formatter(params.storage.logFormat);
+        if (webserver.arg("sessionName").length())
+        {
+            params.storage.gpsSessionName = HTTP::escape(webserver.arg("sessionName").c_str());
+            params.save();
+        }
+
+        gpsSDCardProxy.formatter(params.storage.logFormat, params.storage.gpsSessionName.c_str());
         gpsSDCardProxy.start();
         break;
     }
 
     taskStatusLedBlink.enable();
 
-    isRecording = true;
+    g_isRecording = true;
+
+    HTTP::redirect(webserver, webserver.header("Referer").c_str());
 }
 
 void stopRecording()
@@ -59,8 +66,27 @@ void stopRecording()
     taskStatusLedBlink.disable();
     statusLed.off();
 
-    isRecording = false;
+    g_isRecording = false;
+
+    HTTP::redirect(webserver, webserver.header("Referer").c_str());
 }
+
+void tPowerOff()
+{
+    stopRecording();
+    // wifiSetMode(WIFI_OFF);
+
+    gpsPort.stop();
+
+    // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/sleep_modes.html
+    // rtc_gpio_isolate(GPIO_NUM_12);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_MAX, ESP_PD_OPTION_OFF);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_OFF);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
+    esp_deep_sleep_start();
+}
+Task taskPowerOff(0, TASK_ONCE, &tPowerOff, &ts, false);
 
 static void NMEAClientReply(uint8_t *data, size_t size)
 {
@@ -109,44 +135,37 @@ void NMEAServerStop()
     server->end();
 }
 
-void HTTPNotFound() 
+void HTTPNotFound()
 {
     webserver.send(HTTP_CODE_NOT_FOUND, "text/html", "<h1> 404 Not found</h1><p>The requested resource was not found on this server.</p>");
 }
 
-void HTTPRestart()
+void HTTPPleaseWait()
 {
     webserver.sendContent(HTML_HEADER);
-    webserver.sendContent(R"raw(<div class="page-header"><h1>Restart</h1></div><div class="alert alert-info">Device is rebooting...</div>)raw");
+    webserver.sendContent(R"raw(<div class="page-header"><h1>Please wait</h1></div><div class="alert alert-info">Device is busy... Redirect after <span id="rt">15</span> s.</div>)raw");
+    webserver.sendContent(R"raw(<script>var time = 15;var timer = setInterval(function(){time--;document.getElementById("rt").innerHTML=time;if(time == 0){window.location.pathname='/';clearInterval(timer);}},1000);</script>)raw");
     webserver.sendContent(HTML_FOOTER);
+}
 
-    esp_restart();
+void HTTPRestart()
+{
+    HTTPPleaseWait();
+
+    taskReboot.enableDelayed(2000);
 }
 
 void HTTPPowerOff()
 {
-    webserver.sendContent(HTML_HEADER);
-    webserver.sendContent(R"raw(<div class="page-header"><h1>Power off</h1></div><div class="alert alert-info">Device is powering off...</div>)raw");
-    webserver.sendContent(HTML_FOOTER);
+    HTTPPleaseWait();
 
-    stopRecording();
-    // wifiSetMode(WIFI_OFF);
-
-    gpsPort.stop();
-
-    // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/sleep_modes.html
-    // rtc_gpio_isolate(GPIO_NUM_12);
-    esp_sleep_pd_config(ESP_PD_DOMAIN_MAX, ESP_PD_OPTION_OFF);
-    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_OFF);
-    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
-    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
-    esp_deep_sleep_start();
+    taskPowerOff.enableDelayed(2000);
 }
 
 void HTTPServerStart()
 {
     webserver.onNotFound(HTTPNotFound);
-    
+
     webserver.on("/device/poweroff", HTTPPowerOff);
     webserver.on("/device/restart", HTTPRestart);
 
@@ -155,9 +174,12 @@ void HTTPServerStart()
 
     webserver.addHandler(new AssetHandler());
     webserver.addHandler(new IndexHandler());
-    webserver.addHandler(new SettingsGPSHandler());        
+    webserver.addHandler(new SettingsGPSHandler());
     webserver.addHandler(new SettingsWifiHandler());
     webserver.addHandler(new FileBrowserHandler());
+
+    const char *headers[] = {"Referer"};
+    webserver.collectHeaders(headers, 1);
 
     webserver.begin(HTTP_PORT);
 }
@@ -216,7 +238,7 @@ void wifiSetMode(WiFiMode_t mode)
 
 void buttonPressOneSec()
 {
-    isRecording ? stopRecording() : startRecording();
+    g_isRecording ? stopRecording() : startRecording();
 }
 
 void buttonPressTenSec()

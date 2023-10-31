@@ -23,13 +23,13 @@
                 </div>
                 <div id="navbar" class="collapse navbar-collapse">
                   <ul class="nav navbar-nav">
-                    <li><a href="#">Status</a></li>
+                    <li><a href="/">Status</a></li>
                     <li><a href="/sdcard">File browser</a></li>
                     <li class="dropdown">
                       <a class="dropdown-toggle" href="#">Recording</a>
                       <ul class="dropdown-menu">
-                        <li><a href="/device/recording/start">Start</a></li>
-                        <li><a href="/device/recording/stop">Stop</a></li>
+                        <li id="start-rec"><a href="/device/recording/start">Start</a></li>
+                        <li id="stop-rec"><a href="/device/recording/stop" onclick="return confirm('Are you sure you want to stop recording?')">Stop</a></li>
                       </ul>
                     </li>
                     <li class="dropdown">
@@ -42,8 +42,8 @@
                     <li class="dropdown">
                       <a class="dropdown-toggle" href="#">Power</a>
                       <ul class="dropdown-menu">
-                        <li><a href="/device/restart" class="pure-menu-link" onclick="confirm('Are you sure want to restart device?')">Restart</a></li>
-                        <li><a href="/device/poweroff" class="pure-menu-link" onclick="confirm('Are you sure want to power off device?')">Power off</a></li>
+                        <li><a href="/device/restart" class="pure-menu-link" onclick="return confirm('Are you sure want to restart device?')">Restart</a></li>
+                        <li><a href="/device/poweroff" class="pure-menu-link" onclick="return confirm('Are you sure want to power off device?')">Power off</a></li>
                       </ul>
                     </li>
                   </ul>

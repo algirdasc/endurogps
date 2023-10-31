@@ -1,4 +1,5 @@
 csscompressor
 htmlmin
+slimit
 #html_classes_obfuscator
 #cssdeadwood

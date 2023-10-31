@@ -87,6 +87,7 @@ public:
         server.sendContent("</div></div></div></fieldset>");
 
         server.sendContent(HTML_FORM_CLOSE);
+        server.sendContent(HTML::js());
         server.sendContent(HTML_FOOTER);
 
         return true;
@@ -96,10 +97,10 @@ public:
     {
         params.storage.wifiMode = params.wifiMode(server.arg(PARAM_WIFI_MODE));
         params.storage.wifiFallbackAp = server.hasArg(PARAM_WIFI_FALLBACK_AP);
-        params.storage.wifiApSsid = server.arg(PARAM_WIFI_AP_SSID);
-        params.storage.wifiApPass = server.arg(PARAM_WIFI_AP_PASS);
-        params.storage.wifiStaSsid = server.arg(PARAM_WIFI_STA_SSID);
-        params.storage.wifiStaPass = server.arg(PARAM_WIFI_STA_PASS);
+        params.storage.wifiApSsid = HTTP::escape(server.arg(PARAM_WIFI_AP_SSID).c_str());
+        params.storage.wifiApPass = HTTP::escape(server.arg(PARAM_WIFI_AP_PASS).c_str());
+        params.storage.wifiStaSsid = HTTP::escape(server.arg(PARAM_WIFI_STA_SSID).c_str());
+        params.storage.wifiStaPass = HTTP::escape(server.arg(PARAM_WIFI_STA_PASS).c_str());
 
         params.save();
 

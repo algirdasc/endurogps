@@ -3,7 +3,7 @@
 #include <WebServer.h>
 #include "HTTP/HTTPCodes.h"
 #include "HTTP/Assets/CSS/Style.h"
-// #include "HTTP/Assets/JS/Script.h"
+#include "HTTP/Assets/JS/Script.h"
 
 class AssetHandler : public RequestHandler
 {
@@ -20,6 +20,11 @@ public:
         if (requestUri.equals("/css/style.css"))
         {
             server.send_P(HTTP_CODE_OK, "text/css", CSS_STYLE);
+        }
+
+        if (requestUri.equals("/js/script.js"))
+        {
+            server.send_P(HTTP_CODE_OK, "text/js", JS_SCRIPT);
         }
 
         // if (requestUri == "/js/script.css") {

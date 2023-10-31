@@ -4,7 +4,7 @@
 
 BluetoothProxy::BluetoothProxy()
 {
-    BluetoothSerial serialBT;    
+    BluetoothSerial serialBT;
 }
 
 void BluetoothProxy::start()
@@ -12,7 +12,7 @@ void BluetoothProxy::start()
     esp_bt_controller_enable(ESP_BT_MODE_CLASSIC_BT);
     serialBT.begin(btSsid);
 
-    isStarted = true;
+    isProxyStarted = true;
 }
 
 void BluetoothProxy::stop()
@@ -20,13 +20,15 @@ void BluetoothProxy::stop()
     serialBT.end();
     esp_bt_controller_disable();
 
-    isStarted = false;
+    isProxyStarted = false;
+
     return;
 }
 
 void BluetoothProxy::handle(uint8_t *data, size_t size)
 {
-    if (!isStarted) {
+    if (!isProxyStarted)
+    {
         return;
     }
 

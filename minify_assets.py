@@ -6,6 +6,7 @@ import string
 import htmlmin
 import random
 import csscompressor
+from slimit import minify
 from html_classes_obfuscator import html_classes_obfuscator
 
 assets_dir = "./include/HTTP/Assets/"
@@ -30,9 +31,9 @@ css_files = [
     "./assets/css/style.css",
 ]
 
-js_header_file = "CSS/Style.h"
+js_header_file = "JS/Script.h"
 js_files = [
-    
+    "./assets/js/ui.js",
 ]
 
 # temporary file path
@@ -90,3 +91,12 @@ for css_file in temp_files["css"]:
 with open("{}/{}".format(assets_dir, css_header_file), "w") as header:
     header.write("#pragma once\n\n")
     header.write("const char {}[] = R\"raw({})raw\";".format(variable_name(css_header_file), css_file_content))
+
+js_file_content = ""
+for js_file in temp_files["js"]:
+    with open(js_file, "r") as js:
+        js_file_content += minify(js.read(), mangle=True)
+
+with open("{}/{}".format(assets_dir, js_header_file), "w") as header:
+    header.write("#pragma once\n\n")
+    header.write("const char {}[] = R\"raw({})raw\";".format(variable_name(js_header_file), js_file_content))

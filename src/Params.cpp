@@ -19,6 +19,7 @@ void Params::save()
     preferences.putBool(PARAM_GPS_NMEA_TCP_ENABLED, storage.nmeaTcpEnabled);
     preferences.putUInt(PARAM_GPS_LOG_FORMAT, storage.logFormat);
     preferences.putUInt(PARAM_GPS_OPTIMIZE_FOR, storage.gpsOptimizeFor);
+    preferences.putString(PARAM_GPS_SESSION_NAME, storage.gpsSessionName);
 
     preferences.end();
 }
@@ -44,6 +45,7 @@ void Params::load()
     storage.gpsBaudRate = preferences.getUInt(PARAM_GPS_BAUD_RATE, DEFAULT_PARAM_BAUD_RATE);
     storage.nmeaTcpEnabled = preferences.getBool(PARAM_GPS_NMEA_TCP_ENABLED, DEFAULT_PARAM_NMEA_TCP_ENABLED);
     storage.gpsOptimizeFor = preferences.getUInt(PARAM_GPS_OPTIMIZE_FOR, DEFAULT_PARAM_GPS_OPTIMIZE_FOR);
+    storage.gpsSessionName = preferences.getString(PARAM_GPS_SESSION_NAME, DEFAULT_PARAM_GPS_SESSION_NAME);
 
     preferences.end();
 }

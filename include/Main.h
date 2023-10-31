@@ -4,12 +4,13 @@
 #include <AsyncTCP.h>
 
 #include "EnduroGPS.h"
+#include "Global.h"
 #include "Params.h"
 #include "HTTP.h"
 #include "Battery.h"
 #include "WifiMode.h"
 #include "LED.h"
-#include "SDCard.h"
+#include "SDCardUpdate.h"
 #include "GPS/GPSPort.h"
 #include "GPS/Mode/SDCardProxy.h"
 #include "GPS/Mode/BluetoothProxy.h"

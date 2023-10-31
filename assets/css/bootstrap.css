@@ -8,9 +8,7 @@ body {
 }
 main,
 menu,
-nav,
-section,
-summary {
+nav {
   display: block;
 }
 a {
@@ -20,56 +18,15 @@ a:active,
 a:hover {
   outline: 0;
 }
-abbr[title] {
-  border-bottom: none;
-  text-decoration: underline;
-  text-decoration: underline dotted;
-}
-b,
 strong {
   font-weight: bold;
-}
-dfn {
-  font-style: italic;
 }
 h1 {
   font-size: 2em;
   margin: 0.67em 0;
 }
-mark {
-  background: #ff0;
-  color: #000;
-}
 small {
   font-size: 80%;
-}
-sub,
-sup {
-  font-size: 75%;
-  line-height: 0;
-  position: relative;
-  vertical-align: baseline;
-}
-sup {
-  top: -0.5em;
-}
-sub {
-  bottom: -0.25em;
-}
-img {
-  border: 0;
-}
-svg:not(:root) {
-  overflow: hidden;
-}
-figure {
-  margin: 1em 40px;
-}
-hr {
-  -webkit-box-sizing: content-box;
-  -moz-box-sizing: content-box;
-  box-sizing: content-box;
-  height: 0;
 }
 pre {
   overflow: auto;
@@ -203,60 +160,11 @@ a:focus {
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px;
 }
-figure {
-  margin: 0;
-}
-img {
-  vertical-align: middle;
-}
-.img-responsive {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
-.img-rounded {
-  border-radius: 6px;
-}
-.img-thumbnail {
-  padding: 4px;
-  line-height: 1.42857143;
-  background-color: #ffffff;
-  border: 1px solid #dddddd;
-  border-radius: 4px;
-  -webkit-transition: all 0.2s ease-in-out;
-  -o-transition: all 0.2s ease-in-out;
-  transition: all 0.2s ease-in-out;
-  display: inline-block;
-  max-width: 100%;
-  height: auto;
-}
-.img-circle {
-  border-radius: 50%;
-}
 hr {
   margin-top: 20px;
   margin-bottom: 20px;
   border: 0;
   border-top: 1px solid #eeeeee;
-}
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
-}
-.sr-only-focusable:active,
-.sr-only-focusable:focus {
-  position: static;
-  width: auto;
-  height: auto;
-  margin: 0;
-  overflow: visible;
-  clip: auto;
 }
 [role="button"] {
   cursor: pointer;
@@ -554,67 +462,6 @@ dd {
   .dl-horizontal dd {
     margin-left: 180px;
   }
-}
-abbr[title],
-abbr[data-original-title] {
-  cursor: help;
-}
-.initialism {
-  font-size: 90%;
-  text-transform: uppercase;
-}
-blockquote {
-  padding: 10px 20px;
-  margin: 0 0 20px;
-  font-size: 17.5px;
-  border-left: 5px solid #eeeeee;
-}
-blockquote p:last-child,
-blockquote ul:last-child,
-blockquote ol:last-child {
-  margin-bottom: 0;
-}
-blockquote footer,
-blockquote small,
-blockquote .small {
-  display: block;
-  font-size: 80%;
-  line-height: 1.42857143;
-  color: #777777;
-}
-blockquote footer:before,
-blockquote small:before,
-blockquote .small:before {
-  content: "\2014 \00A0";
-}
-.blockquote-reverse,
-blockquote.pull-right {
-  padding-right: 15px;
-  padding-left: 0;
-  text-align: right;
-  border-right: 5px solid #eeeeee;
-  border-left: 0;
-}
-.blockquote-reverse footer:before,
-blockquote.pull-right footer:before,
-.blockquote-reverse small:before,
-blockquote.pull-right small:before,
-.blockquote-reverse .small:before,
-blockquote.pull-right .small:before {
-  content: "";
-}
-.blockquote-reverse footer:after,
-blockquote.pull-right footer:after,
-.blockquote-reverse small:after,
-blockquote.pull-right small:after,
-.blockquote-reverse .small:after,
-blockquote.pull-right .small:after {
-  content: "\00A0 \2014";
-}
-address {
-  margin-bottom: 20px;
-  font-style: normal;
-  line-height: 1.42857143;
 }
 .container {
   padding-right: 15px;

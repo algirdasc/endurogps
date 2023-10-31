@@ -7,16 +7,17 @@
 #include "GPS/GPSPort.h"
 
 // Default params
-#define DEFAULT_PARAM_GPS_MODE          GPS_MODE_SDCARD
-#define DEFAULT_PARAM_LOG_FORMAT        LOG_FORMAT_VBO
-#define DEFAULT_PARAM_RATE_HZ           GPS_RATE_10_HZ
-#define DEFAULT_PARAM_BAUD_RATE         GPS_RATE_115200
-#define DEFAULT_PARAM_NMEA_TCP_ENABLED  false
-#define DEFAULT_PARAM_WIFI_MODE         PARAM_WIFI_MODE_AP
-#define DEFAULT_PARAM_WIFI_FALLBACK_AP  false
-#define DEFAULT_PARAM_WIFI_AP_NAME      ""
-#define DEFAULT_PARAM_WIFI_AP_PASS      "endurogps815"
-#define DEFAULT_PARAM_GPS_OPTIMIZE_FOR  GPS_OPTIMIZE_FOR_DEFAULT
+#define DEFAULT_PARAM_GPS_MODE GPS_MODE_SDCARD
+#define DEFAULT_PARAM_LOG_FORMAT LOG_FORMAT_VBO
+#define DEFAULT_PARAM_RATE_HZ GPS_RATE_10_HZ
+#define DEFAULT_PARAM_BAUD_RATE GPS_RATE_115200
+#define DEFAULT_PARAM_NMEA_TCP_ENABLED false
+#define DEFAULT_PARAM_WIFI_MODE PARAM_WIFI_MODE_AP
+#define DEFAULT_PARAM_WIFI_FALLBACK_AP false
+#define DEFAULT_PARAM_WIFI_AP_NAME ""
+#define DEFAULT_PARAM_WIFI_AP_PASS "endurogps815"
+#define DEFAULT_PARAM_GPS_OPTIMIZE_FOR GPS_OPTIMIZE_FOR_DEFAULT
+#define DEFAULT_PARAM_GPS_SESSION_NAME DEVICE_NAME
 
 const char PARAM_PREFERENCES_NS[] = "endurogps";
 
@@ -26,6 +27,7 @@ const char PARAM_GPS_RATE_HZ[] = "gpsRateHz";
 const char PARAM_GPS_BAUD_RATE[] = "gpsBaudRate";
 const char PARAM_GPS_NMEA_TCP_ENABLED[] = "nmeaTcpEnabled";
 const char PARAM_GPS_OPTIMIZE_FOR[] = "gpsOptimizeFor";
+const char PARAM_GPS_SESSION_NAME[] = "gpsSessionName";
 const char PARAM_WIFI_MODE_AP[] = "WIFI_AP";
 const char PARAM_WIFI_MODE_STA[] = "WIFI_STA";
 const char PARAM_WIFI_MODE_OFF[] = "WIFI_OFF";
@@ -44,25 +46,27 @@ struct StoredSettingsStruct
     String wifiApPass;
     String wifiApSsid;
     bool wifiFallbackAp;
-         
+
     uint gpsMode;
     uint gpsRateHz;
     uint gpsBaudRate;
     uint gpsOptimizeFor;
     uint logFormat;
+    String gpsSessionName;
 
     bool nmeaTcpEnabled;
 };
 
-class Params 
+class Params
 {
-    private:        
-        Preferences preferences;                
-        
-    public:
-        void save();        
-        void load();
-        String wifiMode(WiFiMode_t wifiMode);
-        WiFiMode_t wifiMode(String wifiMode);
-        StoredSettingsStruct storage;
+private:
+    Preferences preferences;
+
+public:
+    void save();
+    void saveString(const char *paramName);
+    void load();
+    String wifiMode(WiFiMode_t wifiMode);
+    WiFiMode_t wifiMode(String wifiMode);
+    StoredSettingsStruct storage;
 };

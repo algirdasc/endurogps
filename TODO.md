@@ -1,14 +1,19 @@
-- [ ] BUG: Fix VBO logging
-- [ ] FEATURE: Set session name via WEB & add it to filename
-- [x] BUG: Fix bluetooth proxy
+- [x] TODO: Fix VBO Logging
+- [ ] TODO: Fix TrackAddict Logging
+- [x] FEATURE: Set session name via WEB & add it to filename
+- [x] TODO: Fix bluetooth proxy
 - [ ] TODO: Refactor GPS settings to Presets
 - [x] TODO: Customize Wifi AP name & password
 - [x] TODO: Customize BT AP
 - [x] TODO: Add toast message after save
-- [ ] TODO: Test BT proxy when client disconnects
+- [x] TODO: Test BT proxy when client disconnects
 - [x] TODO: Join CSS files to one
-- [x] BUG: fix page title & subtitle
+- [x] TODO: fix page title & subtitle
 - [x] TODO: input patterns for AP name
 - [ ] TODO: device powersave mode
-- [ ] TODO: recover from sd card removal
+- [x] TODO: recover from sd card removal
 - [ ] TODO: index page
+- [ ] TODO: optimize UBLOX parsing in NeoGPS
+- [ ] TODO: minimize CSS 
+- [ ] TODO: test FW update via SD card
+- [ ] TODO: fix javascript 
