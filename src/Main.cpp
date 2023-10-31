@@ -176,7 +176,8 @@ void HTTPServerStart()
     webserver.addHandler(new IndexHandler());
     webserver.addHandler(new SettingsGPSHandler());
     webserver.addHandler(new SettingsWifiHandler());
-    webserver.addHandler(new FileBrowserHandler());
+    webserver.addHandler(new SettingsTrackHandler());
+    webserver.addHandler(new FileBrowserHandler());    
 
     const char *headers[] = {"Referer"};
     webserver.collectHeaders(headers, 1);

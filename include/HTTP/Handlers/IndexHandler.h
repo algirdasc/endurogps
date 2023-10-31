@@ -23,7 +23,7 @@ public:
 
         server.sendContent(pageHeader.c_str());
 
-        server.sendContent(R"raw(<div class="row"><div class="col-md-6 col-md-offset-3"><h3 class="text-center">WiFi Settings</h3><dl class="dl-horizontal">)raw");
+        server.sendContent(R"raw(<div class="row"><div class="col-sm-6 col-sm-offset-3"><h3 class="text-center">WiFi Settings</h3><dl class="dl-horizontal">)raw");
 
         FixedString128 wSsid;
         wSsid.appendFormat(R"raw(<dt>SSID: </dt><dd>%s</dd>)raw", WiFi.SSID());

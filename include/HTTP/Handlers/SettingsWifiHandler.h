@@ -36,7 +36,6 @@ public:
         
         FixedString64 pageHeader;
         pageHeader.appendFormat(HTML_PAGE_HEADER, "WiFi Settings");
-
         server.sendContent(pageHeader.c_str());
 
         if (toast.length() > 0)

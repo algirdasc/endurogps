@@ -1,7 +1,7 @@
 #include "EnduroGPS.h"
 #include "GPS/Formatter/VBOFormatter.h"
 
-void VOBFormatter::filepath(char *filePath, gps_fix gpsFix)
+void VOBFormatter::filepath(char *filePath, gps_fix &gpsFix)
 {
     sprintf(filePath, "/Log-20%02d%02d%02d-%02d%02d%02d_%s.vbo",
             gpsFix.dateTime.year, gpsFix.dateTime.month, gpsFix.dateTime.date,
@@ -9,7 +9,7 @@ void VOBFormatter::filepath(char *filePath, gps_fix gpsFix)
             gpsSessionName);
 }
 
-size_t VOBFormatter::write(File file, gps_fix gpsFix)
+size_t VOBFormatter::write(File &file, gps_fix &gpsFix)
 {
     ulong currentMillis = millis();
     ulong rateCalulationDiff = currentMillis - lastRateCalculationAt;
@@ -20,8 +20,8 @@ size_t VOBFormatter::write(File file, gps_fix gpsFix)
         writeCount = 0;
     }
 
-    char buffer[2048];
-    snprintf(buffer, 2048,
+    char buffer[1024];
+    snprintf(buffer, 1024,
              "%03d %02d%02d%02d.%03d %s%05d.%02d%03d %s%05d.%02d%03d %07.03f %06.02f %08.02f %07.03f %05.02f %05.02f",
              gpsFix.satellites,                                                // Satellites            %03d
              gpsFix.dateTime.hours,                                            // Hours                 %02d
@@ -48,7 +48,7 @@ size_t VOBFormatter::write(File file, gps_fix gpsFix)
     return file.println(buffer);
 }
 
-void VOBFormatter::writeHeader(File file, gps_fix gpsFix)
+void VOBFormatter::writeHeader(File &file, gps_fix &gpsFix)
 {
     char title[256];
     snprintf(title, 256,

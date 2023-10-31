@@ -1,13 +1,16 @@
 # TODO List
 
-- [x] TODO: Create Index page
-- [x] TODO: Fix JavaScript
-- [ ] TODO: Fix TrackAddict Logging
 - [ ] TODO: Migrate to esp-idf
 - [ ] TODO: Optimize UBLOX parsing in NeoGPS
 - [ ] TODO: Refactor GPS settings to Presets
 - [ ] TODO: Minimize Bootstrap CSS
+- [ ] TODO: Fix "too much data" gps error
+- [ ] TODO: Calculate Start/Finish line crossing
 - [ ] TODO: GPS Device PowerSave mode
+- [x] TODO: Mark track start/finish line
+- [x] TODO: Create Index page
+- [x] TODO: Fix JavaScript
+- [x] TODO: Fix TrackAddict Logging
 - [x] TODO: Fix VBO Logging
 - [x] TODO: Set session name via WEB & add it to filename
 - [x] TODO: Fix bluetooth proxy
@@ -21,5 +24,6 @@
 - [x] TODO: recover from sd card removal
 
 - [ ] TEST: Wifi Fallback
+- [ ] TEST: Wifi reconnection to AP
 - [ ] TEST: Bluetooth reconnect (client / server)
 - [ ] TEST: FW update via SD card

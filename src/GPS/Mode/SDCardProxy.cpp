@@ -90,4 +90,6 @@ void SDCardProxy::handleGpsFix(gps_fix gpsFix)
         stop();
         // g_isRecording = false;
     }
+
+    logFile.flush();
 }

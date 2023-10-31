@@ -37,6 +37,10 @@ const char PARAM_WIFI_AP_PASS[] = "wifiApPass";
 const char PARAM_WIFI_STA_SSID[] = "wifiStaSsid";
 const char PARAM_WIFI_STA_PASS[] = "wifiStaPass";
 const char PARAM_WIFI_FALLBACK_AP[] = "wifiFallbackAp";
+const char PARAM_TRACK_L1_LATITUDE[] = "l1Lat";
+const char PARAM_TRACK_L1_LONGITUDE[] = "l1Lon";
+const char PARAM_TRACK_L2_LATITUDE[] = "l2Lat";
+const char PARAM_TRACK_L2_LONGITUDE[] = "l2Lon";
 
 struct StoredSettingsStruct
 {
@@ -53,6 +57,11 @@ struct StoredSettingsStruct
     uint gpsOptimizeFor;
     uint logFormat;
     String gpsSessionName;
+
+    String l1Lat;
+    String l1Lon;
+    String l2Lat;
+    String l2Lon;
 
     bool nmeaTcpEnabled;
 };

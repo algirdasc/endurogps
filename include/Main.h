@@ -18,5 +18,6 @@
 #include "HTTP/Handlers/IndexHandler.h"
 #include "HTTP/Handlers/SettingsWifiHandler.h"
 #include "HTTP/Handlers/SettingsGPSHandler.h"
+#include "HTTP/Handlers/SettingsTrackHandler.h"
 #include "HTTP/Handlers/FileBrowserHandler.h"
 #include "HTTP/Handlers/AssetHandler.h"
