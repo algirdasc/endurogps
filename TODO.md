@@ -1,12 +1,12 @@
 # TODO List
 
 - [ ] TODO: Migrate to esp-idf
-- [ ] TODO: Optimize UBLOX parsing in NeoGPS
-- [ ] TODO: Refactor GPS settings to Presets
 - [ ] TODO: Minimize Bootstrap CSS
-- [ ] TODO: Fix "too much data" gps error
 - [ ] TODO: Calculate Start/Finish line crossing
 - [ ] TODO: GPS Device PowerSave mode
+- [x] TODO: Fix "too much data" gps error
+- [x] TODO: Refactor GPS settings to Presets
+- [x] TODO: Optimize UBLOX parsing in NeoGPS
 - [x] TODO: Mark track start/finish line
 - [x] TODO: Create Index page
 - [x] TODO: Fix JavaScript

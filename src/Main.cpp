@@ -1,4 +1,9 @@
 #include "Main.h"
+#include "Globals.h"
+
+// Initialize globals
+bool g_isRecording = false;
+bool g_isLocationValid = false;
 
 Scheduler ts;
 WifiMode wifiMode;
@@ -11,27 +16,47 @@ Params params;
 Battery battery;
 WebServer webserver;
 BluetoothProxy gpsBTProxy;
-SDCardProxy gpsSDCardProxy;
+NeoGPSProxy gpsNeoGPSProxy;
 
 static std::vector<AsyncClient *> NMEAClients;
 
-void tledBlink()
+void ledToggle()
 {
     statusLed.toggle();
 }
-Task taskStatusLedBlink(1000, TASK_FOREVER, &tledBlink, &ts, false);
+Task taskStatusLedBlink(0, TASK_FOREVER, &ledToggle, &ts, false);
 Task taskReboot(0, TASK_ONCE, &esp_restart, &ts, false);
+
+void setLedStatus()
+{
+    if (g_isRecording && !g_isLocationValid) {
+        taskStatusLedBlink.setInterval(200);
+        taskStatusLedBlink.enable();
+    } else if (g_isRecording && g_isLocationValid) {
+        taskStatusLedBlink.setInterval(2000);
+        taskStatusLedBlink.enable();
+    } else {
+        taskStatusLedBlink.disable();
+    }
+}
+Task taskSetLedStatus(1000, TASK_FOREVER, &setLedStatus, &ts, true);
 
 void gpsInitialize()
 {
     gpsPort.initialize();
     gpsPort.setRefreshRate(params.storage.gpsRateHz);
-    gpsPort.setBaudrate(params.storage.gpsBaudRate);
     gpsPort.optimizeFor(params.storage.gpsOptimizeFor);
 }
 
 void startRecording()
 {
+    params.load();   
+    if (webserver.arg("sessionName").length())
+    {
+        params.storage.gpsSessionName = HTTP::escape(webserver.arg("sessionName").c_str());
+        params.save();
+    }
+    
     gpsPort.start();
 
     switch (params.storage.gpsMode)
@@ -40,35 +65,20 @@ void startRecording()
         gpsBTProxy.start();
         break;
     case GPS_MODE_SDCARD:
-        if (webserver.arg("sessionName").length())
-        {
-            params.storage.gpsSessionName = HTTP::escape(webserver.arg("sessionName").c_str());
-            params.save();
-        }
-
-        gpsSDCardProxy.formatter(params.storage.logFormat, params.storage.gpsSessionName.c_str());
-        gpsSDCardProxy.start();
+        gpsNeoGPSProxy.formatter(params.storage.logFormat, params.storage.gpsSessionName.c_str());
+        gpsNeoGPSProxy.start();
         break;
     }
 
-    taskStatusLedBlink.enable();
-
-    g_isRecording = true;
-
-    HTTP::redirect(webserver, webserver.header("Referer").c_str());
+    HTTP::redirect(webserver);
 }
 
 void stopRecording()
 {
     gpsBTProxy.stop();
-    gpsSDCardProxy.stop();
+    gpsNeoGPSProxy.stop();
 
-    taskStatusLedBlink.disable();
-    statusLed.off();
-
-    g_isRecording = false;
-
-    HTTP::redirect(webserver, webserver.header("Referer").c_str());
+    HTTP::redirect(webserver);
 }
 
 void tPowerOff()
@@ -177,7 +187,7 @@ void HTTPServerStart()
     webserver.addHandler(new SettingsGPSHandler());
     webserver.addHandler(new SettingsWifiHandler());
     webserver.addHandler(new SettingsTrackHandler());
-    webserver.addHandler(new FileBrowserHandler());    
+    webserver.addHandler(new FileBrowserHandler());
 
     const char *headers[] = {"Referer"};
     webserver.collectHeaders(headers, 1);
@@ -209,12 +219,14 @@ void handleGPSPort()
     switch (params.storage.gpsMode)
     {
     case GPS_MODE_BT:
-        gpsBTProxy.handle(buf, len);
+        gpsBTProxy.handleProxy(buf, len);
         break;
     case GPS_MODE_SDCARD:
-        gpsSDCardProxy.handle(buf, len);
+        gpsNeoGPSProxy.handleProxy(buf, len);
         break;
     }
+
+
 }
 
 void wifiSetMode(WiFiMode_t mode)
@@ -269,9 +281,6 @@ void buttonPressFiveSec()
 void setup()
 {
     SerialMonitor.begin(LOG_BAUD_RATE);
-    // log_d("ESP32 SDK: %s", ESP.getSdkVersion());
-    // log_d("Arduino sketch: %s", __FILE__);
-    // log_d("Compiled on: %s", __DATE__);
 
     // SDCard start & check for updates
     sdCard.start();
@@ -300,10 +309,6 @@ void setup()
     button.onPressedFor(10000, buttonPressTenSec);
 
     statusLed.off();
-
-    // Dump information
-    // log_d("Battery voltage: %.2f V", battery.voltage());
-    // log_d("Battery percentage: %d %%", battery.percentage());
 }
 
 void loop()
@@ -315,6 +320,4 @@ void loop()
     button.read();
 
     ts.execute();
-
-    // log_i("Heap: %d / %d", ESP.getFreeHeap(), ESP.getHeapSize());
 }

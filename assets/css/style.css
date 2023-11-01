@@ -6,17 +6,17 @@
     border-radius: 4px;
 }
 
-.breadcrumb > li {
-    display: inline-block;    
+.breadcrumb>li {
+    display: inline-block;
 }
 
-.breadcrumb > li + li:before {
+.breadcrumb>li+li:before {
     padding: 0 5px;
     color: #ccc;
     content: "/";
 }
 
-.breadcrumb > .active {
+.breadcrumb>.active {
     color: #777;
 }
 
@@ -43,4 +43,21 @@
     color: #31708f;
     background-color: #d9edf7;
     border-color: #bce8f1;
+}
+
+.text-blink {
+    animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}
+
+#rec-status {
+    float: left;
+    padding: 15px 5px 15px 15px;
+    font-size: 18px;
+    line-height: 20px;
 }

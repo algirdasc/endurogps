@@ -2,61 +2,59 @@
 
 void GPSPort::initialize()
 {
-    GPSSerial.begin(GPS_BAUD_RATE, SERIAL_8N1, GPIO_GPS_RX, GPIO_GPS_TX);
-    GPSSerial.setTimeout(GPS_UART_TIMEOUT);
-
-    pushMessage(UBLOX_WARMSTART_WITH_START, sizeof(UBLOX_WARMSTART_WITH_START));
-
+    GPSSerial.setRxBufferSize(GPS_RX_BUFFER_SIZE);
+    GPSSerial.begin(0, SERIAL_8N1, GPIO_GPS_RX, GPIO_GPS_TX);
+    pushMessage(UBX_CFG_PRT__SETUP, sizeof(UBX_CFG_PRT__SETUP));
     GPSSerial.flush();
     delay(250);
     GPSSerial.end();
     delay(250);
+    GPSSerial.begin(0, SERIAL_8N1, GPIO_GPS_RX, GPIO_GPS_TX);
 
-    GPSSerial.setRxBufferSize(GPS_RX_BUFFER_SIZE);
-    GPSSerial.begin(0, SERIAL_8N1, GPIO_GPS_RX, GPIO_GPS_TX, false, GPS_UART_TIMEOUT);
-    log_d("Start UART connection on RX pin %d, TX pin %d and autobaudrate", GPIO_GPS_RX, GPIO_GPS_TX);
-    if (GPSSerial.baudRate() > 0)
-    {
-        log_d("Connected with auto-baudrate at %u", GPSSerial.baudRate());
-    }
-    else
-    {
-        log_e("Can't auto find BAUD rate, forcing %u", GPS_BAUD_RATE);
-        // TODO: enable pulsing error on the LED to signal the user that something is bad
-        GPSSerial.begin(GPS_BAUD_RATE, SERIAL_8N1, GPIO_GPS_RX, GPIO_GPS_TX);
-    }
+    start();
+
+    // Setup
+    pushMessage(UBX_CFG_GNSS__SETUP, sizeof(UBX_CFG_GNSS__SETUP));
+    pushMessage(UBX_CFG_NAV5__SETUP, sizeof(UBX_CFG_NAV5__SETUP));
+
+    // Optimizations
+    pushMessage(UBX_CFG_PMS__SETUP, sizeof(UBX_CFG_PMS__SETUP));
+    pushMessage(UBX_CFG_PMS__SAVE, sizeof(UBX_CFG_PMS__SAVE));
+    pushMessage(UBX_CFG_SBAS__SETUP, sizeof(UBX_CFG_SBAS__SETUP));
+    pushMessage(UBX_CFG_NAVX5__SETUP, sizeof(UBX_CFG_NAVX5__SETUP));
+    pushMessage(UBX_CFG_ITFM__SETUP, sizeof(UBX_CFG_ITFM__SETUP));
+
+    pushMessage(UBX_CFG_CFG__SAVE, sizeof(UBX_CFG_CFG__SAVE));
 }
 
 void GPSPort::pushMessage(const char message[], uint size)
 {
+    uint8_t CK_A, CK_B;
+    size_t ubxMsgSize = size + 4;
+    uint8_t ubxMsg[ubxMsgSize];
+
+    // Header
+    ubxMsg[0] = 0xB5;
+    ubxMsg[1] = 0x62;
+
     for (uint i = 0; i < size; i++)
     {
-        GPSSerial.write(message[i]);
-    }
-}
-
-void GPSPort::setBaudrate(uint32_t baudRate)
-{
-    switch (baudRate)
-    {
-    case GPS_RATE_38400:
-        pushMessage(UBLOX_BAUD_38400, sizeof(UBLOX_BAUD_38400));
-        break;
-    case GPS_RATE_57600:
-        pushMessage(UBLOX_BAUD_57600, sizeof(UBLOX_BAUD_57600));
-        break;
-    case GPS_RATE_115200:
-        pushMessage(UBLOX_BAUD_115200, sizeof(UBLOX_BAUD_115200));
-        break;
-    default:
-        pushMessage(UBLOX_BAUD_38400, sizeof(UBLOX_BAUD_38400));
-        break;
+        CK_A += message[i];
+        CK_B += CK_A;
+        ubxMsg[i + 2] = message[i];
     }
 
-    GPSSerial.flush();
-    delay(500);
+    ubxMsg[ubxMsgSize - 2] = CK_A;
+    ubxMsg[ubxMsgSize - 1] = CK_B;
 
-    GPSSerial.updateBaudRate(baudRate);
+    // for (int i = 0; i < ubxMsgSize; i++)
+    // {
+    //     char buff[8];
+    //     sprintf(buff, "%02X ", ubxMsg[i]);
+    //     Serial.print(buff);
+    // }
+    // Serial.println();
+    GPSSerial.write(ubxMsg, ubxMsgSize);
 }
 
 void GPSPort::setRefreshRate(uint refreshRate)
@@ -64,25 +62,25 @@ void GPSPort::setRefreshRate(uint refreshRate)
     switch (refreshRate)
     {
     case GPS_RATE_1_HZ:
-        pushMessage(UBLOX_INIT_1HZ, sizeof(UBLOX_INIT_1HZ));
+        pushMessage(UBX_CFG_RATE__1HZ, sizeof(UBX_CFG_RATE__1HZ));
         break;
     case GPS_RATE_5_HZ:
-        pushMessage(UBLOX_INIT_5HZ, sizeof(UBLOX_INIT_5HZ));
+        pushMessage(UBX_CFG_RATE__5HZ, sizeof(UBX_CFG_RATE__5HZ));
         break;
     case GPS_RATE_10_HZ:
-        pushMessage(UBLOX_INIT_10HZ, sizeof(UBLOX_INIT_10HZ));
+        pushMessage(UBX_CFG_RATE__10HZ, sizeof(UBX_CFG_RATE__10HZ));
         break;
     }
 }
 
 void GPSPort::stop()
 {
-    pushMessage(UBLOX_PWR_STOP, sizeof(UBLOX_PWR_STOP));
+    pushMessage(UBX_CFG_RST__GNSS_STOP, sizeof(UBX_CFG_RST__GNSS_STOP));
 }
 
 void GPSPort::start()
 {
-    pushMessage(UBLOX_PWR_START, sizeof(UBLOX_PWR_START));
+    pushMessage(UBX_CFG_RST__GNSS_START, sizeof(UBX_CFG_RST__GNSS_START));
 }
 
 void GPSPort::setPowerSave(uint timeS)
@@ -99,40 +97,64 @@ void GPSPort::setPowerSave(uint timeS)
 
 void GPSPort::optimizeFor(uint app)
 {
+    if (app == GPS_OPTIMIZE_FOR_U_CENTER)
+    {
+        return;
+    }
+
+    // Leave RMC - recommended minimum
+    pushMessage(UBX_CFG_MSG__GxRMC_ON, sizeof(UBX_CFG_MSG__GxRMC_ON));
+
+    // Turn off all messages
+    // NMEA
+    pushMessage(UBX_CFG_MSG__GxGGA_OFF, sizeof(UBX_CFG_MSG__GxGGA_OFF));
+    pushMessage(UBX_CFG_MSG__GxGLL_OFF, sizeof(UBX_CFG_MSG__GxGLL_OFF));
+    pushMessage(UBX_CFG_MSG__GxGSA_OFF, sizeof(UBX_CFG_MSG__GxGSA_OFF));
+    pushMessage(UBX_CFG_MSG__GxGSV_OFF, sizeof(UBX_CFG_MSG__GxGSV_OFF));
+    pushMessage(UBX_CFG_MSG__GxVTG_OFF, sizeof(UBX_CFG_MSG__GxVTG_OFF));
+    pushMessage(UBX_CFG_MSG__GxGRS_OFF, sizeof(UBX_CFG_MSG__GxGRS_OFF));
+    pushMessage(UBX_CFG_MSG__GxGST_OFF, sizeof(UBX_CFG_MSG__GxGST_OFF));
+    pushMessage(UBX_CFG_MSG__GxZDA_OFF, sizeof(UBX_CFG_MSG__GxZDA_OFF));
+    pushMessage(UBX_CFG_MSG__GxGBS_OFF, sizeof(UBX_CFG_MSG__GxGBS_OFF));
+    pushMessage(UBX_CFG_MSG__GxDTM_OFF, sizeof(UBX_CFG_MSG__GxDTM_OFF));
+    pushMessage(UBX_CFG_MSG__GxGNS_OFF, sizeof(UBX_CFG_MSG__GxGNS_OFF));
+    pushMessage(UBX_CFG_MSG__GxVLW_OFF, sizeof(UBX_CFG_MSG__GxVLW_OFF));
+
+    // PUBX
+    pushMessage(UBX_CFG_MSG__PUBX00_ON, sizeof(UBX_CFG_MSG__PUBX00_ON));
+    pushMessage(UBX_CFG_MSG__PUBX02_OFF, sizeof(UBX_CFG_MSG__PUBX02_OFF));
+    pushMessage(UBX_CFG_MSG__PUBX03_OFF, sizeof(UBX_CFG_MSG__PUBX03_OFF));
+    pushMessage(UBX_CFG_MSG__PUBX04_OFF, sizeof(UBX_CFG_MSG__PUBX04_OFF));
+
     switch (app)
     {
     case GPS_OPTIMIZE_FOR_TRACKADDICT:
         // https://forum.hptuners.com/showthread.php?69123-Track-addict-external-GPS&highlight=gps
-        pushMessage(UBLOX_TRACKADDICT_CHANNELS, sizeof(UBLOX_TRACKADDICT_CHANNELS));
-        pushMessage(UBLOX_GxGLL_ON, sizeof(UBLOX_GxGLL_ON));
-        pushMessage(UBLOX_GxVTG_OFF, sizeof(UBLOX_GxVTG_OFF));
-        pushMessage(UBLOX_GxGSA_OFF, sizeof(UBLOX_GxGSA_OFF));
-        pushMessage(UBLOX_GxGSV_OFF, sizeof(UBLOX_GxGSV_OFF));
-        pushMessage(UBLOX_GxGBS_OFF, sizeof(UBLOX_GxGBS_OFF));
+        pushMessage(UBX_CFG_NMEA__GP_TALKER, sizeof(UBX_CFG_NMEA__GP_TALKER));
+        pushMessage(UBX_CFG_MSG__GxGGA_ON, sizeof(UBX_CFG_MSG__GxGGA_ON));
+        pushMessage(UBX_CFG_MSG__GxGLL_ON, sizeof(UBX_CFG_MSG__GxGLL_ON));
         break;
-    case GPS_OPTIMIZE_FOR_RACECHRONO:
+    case GPS_OPTIMIZE_FOR_RACECHRONO_GGA:
         // https://racechrono.com/forum/discussion/comment/11252/#Comment_11252
         // https://racechrono.com/forum/discussion/1421/best-settings-for-qstarz818xt
-        pushMessage(UBLOX_RACECHRONO_CHANNELS, sizeof(UBLOX_RACECHRONO_CHANNELS));
-        pushMessage(UBLOX_GxGLL_OFF, sizeof(UBLOX_GxGLL_OFF));
-        pushMessage(UBLOX_GxVTG_OFF, sizeof(UBLOX_GxVTG_OFF));
-        pushMessage(UBLOX_GxGSA_ON, sizeof(UBLOX_GxGSA_ON));
-        pushMessage(UBLOX_GxGSV_ON, sizeof(UBLOX_GxGSV_ON));
-        pushMessage(UBLOX_GxGBS_OFF, sizeof(UBLOX_GxGBS_OFF));
+        pushMessage(UBX_CFG_NMEA__GP_TALKER, sizeof(UBX_CFG_NMEA__GP_TALKER));
+        pushMessage(UBX_CFG_MSG__GxGGA_ON, sizeof(UBX_CFG_MSG__GxGGA_ON));
+        break;
+    case GPS_OPTIMIZE_FOR_RACECHRONO_VTG_ZDA:
+        pushMessage(UBX_CFG_NMEA__DEFAULT, sizeof(UBX_CFG_NMEA__DEFAULT));
+        pushMessage(UBX_CFG_MSG__GxVTG_ON, sizeof(UBX_CFG_MSG__GxVTG_ON));
+        pushMessage(UBX_CFG_MSG__GxZDA_ON, sizeof(UBX_CFG_MSG__GxZDA_ON));
         break;
     case GPS_OPTIMIZE_FOR_RACETIME:
-        pushMessage(UBLOX_GxGLL_ON, sizeof(UBLOX_GxGLL_ON));
-        pushMessage(UBLOX_GxVTG_ON, sizeof(UBLOX_GxVTG_ON));
-        pushMessage(UBLOX_GxGSA_OFF, sizeof(UBLOX_GxGSA_OFF));
-        pushMessage(UBLOX_GxGSV_OFF, sizeof(UBLOX_GxGSV_OFF));
-        pushMessage(UBLOX_GxGBS_OFF, sizeof(UBLOX_GxGBS_OFF));
+        pushMessage(UBX_CFG_NMEA__GP_TALKER, sizeof(UBX_CFG_NMEA__GP_TALKER));
+        pushMessage(UBX_CFG_MSG__GxGBS_ON, sizeof(UBX_CFG_MSG__GxGBS_ON));
+        pushMessage(UBX_CFG_MSG__GxGGA_ON, sizeof(UBX_CFG_MSG__GxGGA_ON));
         break;
     default:
-        pushMessage(UBLOX_GxGLL_OFF, sizeof(UBLOX_GxGLL_OFF));
-        pushMessage(UBLOX_GxVTG_OFF, sizeof(UBLOX_GxVTG_OFF));
-        pushMessage(UBLOX_GxGSA_OFF, sizeof(UBLOX_GxGSA_OFF));
-        pushMessage(UBLOX_GxGSV_OFF, sizeof(UBLOX_GxGSV_OFF));
-        pushMessage(UBLOX_GxGBS_OFF, sizeof(UBLOX_GxGBS_OFF));
+        // TODO:
+        pushMessage(UBX_CFG_NMEA__DEFAULT, sizeof(UBX_CFG_NMEA__DEFAULT));
         break;
     }
+
+    pushMessage(UBX_CFG_CFG__SAVE, sizeof(UBX_CFG_CFG__SAVE));
 }

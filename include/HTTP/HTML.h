@@ -4,8 +4,8 @@
 #include <WebServer.h>
 #include <FixedString.h>
 
-#include "Global.h"
 #include "Params.h"
+#include "Globals.h"
 #include "HTTP/HTTPCodes.h"
 #include "HTTP/Assets/HTML/Header.h"
 #include "HTTP/Assets/HTML/Footer.h"
@@ -22,7 +22,7 @@ const char HTML_REDIRECT[] = R"raw(<div class="text-center">Redirecting to <a hr
 const char HTML_BREADCRUMB_ACTIVE[] = R"raw(<li class="active">%s</li>)raw";
 const char HTML_BREADCRUMB_INACTIVE[] = R"raw(<li><a href="%s">%s</a></li>)raw";
 const char HTML_SETTINGS_SUCCESS[] = R"raw(<div class="alert alert-success">Settings saved successfully. Settings will apply after device restart.</div>)raw";
-const char HTML_JS[] = R"raw(<script>var g_isRecording=%s;var g_sessionName='%s';</script>)raw";
+const char HTML_JS[] = R"raw(<script>var g_isRecording=%s;var g_sessionName='%s';var g_isLocationValid=%s;</script>)raw";
 const char HTML_ALERT[] = R"raw(<div class="alert alert-danger">%s</div>)raw";
 
 class HTML
@@ -90,7 +90,8 @@ public:
         FixedString256 js;
         js.appendFormat(HTML_JS,
                         g_isRecording ? "true" : "false",
-                        params.storage.gpsSessionName);
+                        params.storage.gpsSessionName,
+                        g_isLocationValid ? "true" : "false");
 
         return js.c_str();
     }

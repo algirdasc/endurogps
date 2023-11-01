@@ -1,30 +1,30 @@
 #pragma once
 
-#include <GPSfix_cfg.h>
-#include <NMEAGPS.h>
 #include <SD.h>
-
 #include "Params.h"
+#include "Globals.h"
 
+#include "GPS/NeoGPS.h"
 #include "GPS/Mode/BaseProxy.h"
 #include "GPS/Formatter/BaseFormatter.h"
 #include "GPS/Formatter/TrackAddictCSVFormatter.h"
 #include "GPS/Formatter/VBOFormatter.h"
 
-class SDCardProxy : public BaseProxy
+class NeoGPSProxy : public BaseProxy
 {
     private:
-        NMEAGPS nmeaGps;
-        gps_fix gpsFix;
+        ubloxNMEA gps;        
         BaseFormatter *logFormatter;
         File logFile;        
         bool isProxyFileCreated = false;
-        void handleGpsFix(gps_fix gpsFix);
+        void handleFormatter(gps_fix gpsFix);
     public:
-        SDCardProxy();
+        NeoGPSProxy();
+
+        gps_fix gpsFix;
 
         void formatter(uint formatter, const char *gpsSessionName);
         void start();
         void stop();
-        void handle(uint8_t *data, size_t size);
+        void handleProxy(uint8_t *data, size_t size);
 };

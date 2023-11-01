@@ -10,7 +10,6 @@
 #define DEFAULT_PARAM_GPS_MODE GPS_MODE_SDCARD
 #define DEFAULT_PARAM_LOG_FORMAT LOG_FORMAT_VBO
 #define DEFAULT_PARAM_RATE_HZ GPS_RATE_10_HZ
-#define DEFAULT_PARAM_BAUD_RATE GPS_RATE_115200
 #define DEFAULT_PARAM_NMEA_TCP_ENABLED false
 #define DEFAULT_PARAM_WIFI_MODE PARAM_WIFI_MODE_AP
 #define DEFAULT_PARAM_WIFI_FALLBACK_AP false
@@ -24,7 +23,6 @@ const char PARAM_PREFERENCES_NS[] = "endurogps";
 const char PARAM_GPS_MODE[] = "gpsMode";
 const char PARAM_GPS_LOG_FORMAT[] = "logFormat";
 const char PARAM_GPS_RATE_HZ[] = "gpsRateHz";
-const char PARAM_GPS_BAUD_RATE[] = "gpsBaudRate";
 const char PARAM_GPS_NMEA_TCP_ENABLED[] = "nmeaTcpEnabled";
 const char PARAM_GPS_OPTIMIZE_FOR[] = "gpsOptimizeFor";
 const char PARAM_GPS_SESSION_NAME[] = "gpsSessionName";
@@ -53,7 +51,6 @@ struct StoredSettingsStruct
 
     uint gpsMode;
     uint gpsRateHz;
-    uint gpsBaudRate;
     uint gpsOptimizeFor;
     uint logFormat;
     String gpsSessionName;

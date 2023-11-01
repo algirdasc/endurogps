@@ -10,6 +10,11 @@
 class HTTP
 {
 public:
+    static void redirect(WebServer &server)
+    {
+        redirect(server, server.header("Referer").c_str());
+    }
+
     static void redirect(WebServer &server, const char *uri)
     {
         FixedString128 content;

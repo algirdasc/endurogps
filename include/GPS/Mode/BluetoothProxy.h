@@ -4,6 +4,7 @@
 #include <esp_bt.h>
 
 #include "EnduroGPS.h"
+#include "Globals.h"
 #include "GPS/Mode/BaseProxy.h"
 
 class BluetoothProxy : public BaseProxy
@@ -19,7 +20,7 @@ class BluetoothProxy : public BaseProxy
 
         void start();
         void stop();
-        void handle(uint8_t *data, size_t size);
+        void handleProxy(uint8_t *data, size_t size);
 
         void setConnected(bool connected) { isDeviceConnected = connected; }
 };

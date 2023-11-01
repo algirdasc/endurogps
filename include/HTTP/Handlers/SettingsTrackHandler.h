@@ -52,6 +52,8 @@ public:
         server.sendContent(HTML::input("L1 Longitude", PARAM_TRACK_L1_LONGITUDE, params.storage.l1Lon.c_str(), "text", 12, R"raw(pattern="[0-9.]+")raw"));
         server.sendContent(R"raw(</div></div></div></div>)raw");
 
+        server.sendContent(HTML::checkbox("Use current position", "l1Current", true));
+
         server.sendContent(R"raw(<div class="col-sm-6"><div class="row"><div class="col-xs-6"><div class="form-group">)raw");
         server.sendContent(HTML::input("L2 Latitude", PARAM_TRACK_L2_LATITUDE, params.storage.l2Lat.c_str(), "text", 12, R"raw(pattern="[0-9.]+")raw"));
         server.sendContent(R"raw(</div></div><div class="col-xs-6"><div class="form-group">)raw");

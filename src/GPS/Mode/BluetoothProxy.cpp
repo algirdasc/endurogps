@@ -1,7 +1,5 @@
 #include "GPS/Mode/BluetoothProxy.h"
 
-#define DEVICE_NAME_SIZE 20
-
 BluetoothProxy::BluetoothProxy()
 {
     BluetoothSerial serialBT;
@@ -13,6 +11,7 @@ void BluetoothProxy::start()
     serialBT.begin(btSsid);
 
     isProxyStarted = true;
+    g_isRecording = true;
 }
 
 void BluetoothProxy::stop()
@@ -21,11 +20,10 @@ void BluetoothProxy::stop()
     esp_bt_controller_disable();
 
     isProxyStarted = false;
-
-    return;
+    g_isRecording = false;
 }
 
-void BluetoothProxy::handle(uint8_t *data, size_t size)
+void BluetoothProxy::handleProxy(uint8_t *data, size_t size)
 {
     if (!isProxyStarted)
     {

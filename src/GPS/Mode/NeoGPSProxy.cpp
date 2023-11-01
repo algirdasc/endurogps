@@ -1,13 +1,12 @@
-// #include "Global.h"
-#include "GPS/Mode/SDCardProxy.h"
+#include "GPS/Mode/NeoGPSProxy.h"
 
-SDCardProxy::SDCardProxy()
+NeoGPSProxy::NeoGPSProxy()
 {
-    NMEAGPS nmeaGps;
+    ubloxNMEA gps;
     gps_fix gpsFix;
 }
 
-void SDCardProxy::formatter(uint formatter, const char *gpsSessionName)
+void NeoGPSProxy::formatter(uint formatter, const char *gpsSessionName)
 {
     switch (formatter)
     {
@@ -22,12 +21,13 @@ void SDCardProxy::formatter(uint formatter, const char *gpsSessionName)
     logFormatter->gpsSessionName = gpsSessionName;
 }
 
-void SDCardProxy::start()
+void NeoGPSProxy::start()
 {
     isProxyStarted = SD.begin();
+    g_isRecording = isProxyStarted;
 }
 
-void SDCardProxy::stop()
+void NeoGPSProxy::stop()
 {
     if (logFile)
     {
@@ -36,9 +36,10 @@ void SDCardProxy::stop()
 
     isProxyStarted = false;
     isProxyFileCreated = false;
+    g_isRecording = false;
 }
 
-void SDCardProxy::handle(uint8_t *data, size_t size)
+void NeoGPSProxy::handleProxy(uint8_t *data, size_t size)
 {
     if (!isProxyStarted)
     {
@@ -47,48 +48,46 @@ void SDCardProxy::handle(uint8_t *data, size_t size)
 
     for (uint i = 0; i < size; i++)
     {
-        nmeaGps.handle(data[i]);
+        gps.handle(data[i]);
     }
 
-    if (nmeaGps.available())
+    if (gps.available())
     {
-        gpsFix = nmeaGps.read();
-        handleGpsFix(gpsFix);
+        gpsFix = gps.read();
+        handleFormatter(gpsFix);
     }
 
-    if (nmeaGps.overrun())
+    if (gps.overrun())
     {
-        nmeaGps.overrun(false);
+        gps.overrun(false);
         log_e("Too much data");
     }
 }
 
-void SDCardProxy::handleGpsFix(gps_fix gpsFix)
-{
-    if (!gpsFix.valid.date || !gpsFix.valid.time)
+void NeoGPSProxy::handleFormatter(gps_fix gpsFix)
+{      
+    if (!isProxyFileCreated && (!gpsFix.valid.date || !gpsFix.valid.time))
     {
         log_e("Waiting for valid GPS date/time to create file");
 
         return;
     }
-
+    
     if (!isProxyFileCreated)
     {
         logFile = logFormatter->create(gpsFix);
         isProxyFileCreated = true;
     }
 
-    if (!gpsFix.valid.location)
+    g_isLocationValid = gpsFix.valid.location;
+    if (!g_isLocationValid)
     {
-        log_e("Invalid location, waiting...");
-
         return;
     }
 
     if (isProxyFileCreated && !logFormatter->write(logFile, gpsFix))
     {
         stop();
-        // g_isRecording = false;
     }
 
     logFile.flush();

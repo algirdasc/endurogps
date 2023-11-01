@@ -67,19 +67,16 @@ public:
         server.sendContent(HTML_SELECT_CLOSE);
         server.sendContent(R"raw(</div></div><div class="col-sm-6"><div class="form-group">)raw");
 
-        server.sendContent(HTML::select("GPS baud rate", PARAM_GPS_BAUD_RATE));
-        server.sendContent(HTML::option(GPS_RATE_38400, "38400", params.storage.gpsBaudRate == GPS_RATE_38400));
-        server.sendContent(HTML::option(GPS_RATE_57600, "57600", params.storage.gpsBaudRate == GPS_RATE_57600));
-        server.sendContent(HTML::option(GPS_RATE_115200, "115200", params.storage.gpsBaudRate == GPS_RATE_115200));
-        server.sendContent(HTML_SELECT_CLOSE);
         server.sendContent(R"raw(</div></div></div></fieldset><fieldset><legend>NMEA Options</legend><div class="form-group">)raw");
         server.sendContent(HTML::checkbox("Enable NMEA TCP Server", PARAM_GPS_NMEA_TCP_ENABLED, params.storage.nmeaTcpEnabled));
         server.sendContent(R"raw(</div></fieldset><fieldset><legend>Presets</legend><div class="form-group">)raw");
 
         server.sendContent(HTML::select("Optimize GPS settings for", PARAM_GPS_OPTIMIZE_FOR));
         server.sendContent(HTML::option(GPS_OPTIMIZE_FOR_DEFAULT, "Default"));
+        server.sendContent(HTML::option(GPS_OPTIMIZE_FOR_U_CENTER, "u-center"));
         server.sendContent(HTML::option(GPS_OPTIMIZE_FOR_TRACKADDICT, "TrackAddict"));
-        server.sendContent(HTML::option(GPS_OPTIMIZE_FOR_RACECHRONO, "RaceChrono"));
+        server.sendContent(HTML::option(GPS_OPTIMIZE_FOR_RACECHRONO_GGA, "RaceChrono (GxGGA)"));
+        server.sendContent(HTML::option(GPS_OPTIMIZE_FOR_RACECHRONO_VTG_ZDA, "RaceChrono (GxVTG+GxZDA)"));
         server.sendContent(HTML::option(GPS_OPTIMIZE_FOR_RACETIME, "RaceTime"));
         server.sendContent(HTML_SELECT_CLOSE);
 
@@ -97,7 +94,6 @@ public:
         params.storage.gpsMode = server.arg(PARAM_GPS_MODE).toInt();
         params.storage.logFormat = server.arg(PARAM_GPS_LOG_FORMAT).toInt();
         params.storage.gpsRateHz = server.arg(PARAM_GPS_RATE_HZ).toInt();
-        params.storage.gpsBaudRate = server.arg(PARAM_GPS_BAUD_RATE).toInt();
         params.storage.nmeaTcpEnabled = server.hasArg(PARAM_GPS_NMEA_TCP_ENABLED);
         params.storage.gpsOptimizeFor = server.arg(PARAM_GPS_OPTIMIZE_FOR).toInt();
 

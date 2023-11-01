@@ -26,11 +26,11 @@ public:
         server.sendContent(R"raw(<div class="row"><div class="col-sm-6 col-sm-offset-3"><h3 class="text-center">WiFi Settings</h3><dl class="dl-horizontal">)raw");
 
         FixedString128 wSsid;
-        wSsid.appendFormat(R"raw(<dt>SSID: </dt><dd>%s</dd>)raw", WiFi.SSID());
+        wSsid.appendFormat(R"raw(<dt>SSID: </dt><dd>%s</dd>)raw", WiFi.getMode() == WIFI_AP ? WiFi.softAPSSID().c_str() : WiFi.SSID().c_str());
         server.sendContent(wSsid.c_str());
 
         FixedString128 wIpAddr;
-        wIpAddr.appendFormat(R"raw(<dt>IP: </dt><dd>%s</dd>)raw", WiFi.localIP().toString());
+        wIpAddr.appendFormat(R"raw(<dt>IP: </dt><dd>%s</dd>)raw", WiFi.getMode() == WIFI_AP ? WiFi.softAPIP().toString() : WiFi.localIP().toString());
         server.sendContent(wIpAddr.c_str());
 
         server.sendContent(R"raw(</dl><h3 class="text-center">Battery:</h3><dl class="dl-horizontal">)raw");

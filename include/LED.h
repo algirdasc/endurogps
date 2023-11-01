@@ -12,6 +12,6 @@ class LED
         LED(int GPIO);
 
         void off();
-        void blink();
+        void on();
         void toggle();
 };

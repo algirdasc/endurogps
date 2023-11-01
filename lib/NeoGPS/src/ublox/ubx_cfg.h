@@ -30,12 +30,10 @@
 #define UBLOX_PARSE_TIMEUTC
 #define UBLOX_PARSE_POSLLH
 // #define UBLOX_PARSE_DOP
-// #define UBLOX_PARSE_PVT
+// #define UBLOX_PARSE_PVT // Navigation Position Velocity Time Solution
 #define UBLOX_PARSE_VELNED
-// #define UBLOX_PARSE_SVINFO
-// #define UBLOX_PARSE_CFGNAV5
-// #define UBLOX_PARSE_MONVER
-// #define UBLOX_PARSE_HNR_PVT
+#define UBLOX_PARSE_SVINFO
+// #define UBLOX_PARSE_HNR_PVT // High Rate Output of PVT Solution
 
 #if defined(UBLOX_PARSE_DOP) & \
     ( !defined(GPS_FIX_HDOP) & \

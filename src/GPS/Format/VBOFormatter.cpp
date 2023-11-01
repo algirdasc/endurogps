@@ -44,7 +44,7 @@ size_t VOBFormatter::write(File &file, gps_fix &gpsFix)
              gpsFix.alt_err()                                                  // altitude_precision    %05.02f
     );
 
-    writeCount++;   
+    writeCount++;
     return file.println(buffer);
 }
 
