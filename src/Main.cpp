@@ -7,7 +7,7 @@ bool g_isLocationValid = false;
 
 Scheduler ts;
 WifiMode wifiMode;
-EasyButton button(GPIO_BUTTON);
+Button button(GPIO_BUTTON);
 LED statusLed(GPIO_LED);
 SDCard sdCard;
 AsyncServer *server = new AsyncServer(NMEA_PORT);
@@ -29,14 +29,27 @@ Task taskReboot(0, TASK_ONCE, &esp_restart, &ts, false);
 
 void setLedStatus()
 {
-    if (g_isRecording && !g_isLocationValid) {
+    if (g_isRecording && !g_isLocationValid)
+    {
+        if (!taskStatusLedBlink.isEnabled())
+        {
+            taskStatusLedBlink.enable();
+        }
         taskStatusLedBlink.setInterval(200);
-        taskStatusLedBlink.enable();
-    } else if (g_isRecording && g_isLocationValid) {
+    }
+    else if (g_isRecording && g_isLocationValid)
+    {
+        if (!taskStatusLedBlink.isEnabled())
+        {
+            taskStatusLedBlink.enable();
+        }
+
         taskStatusLedBlink.setInterval(2000);
-        taskStatusLedBlink.enable();
-    } else {
+    }
+    else
+    {
         taskStatusLedBlink.disable();
+        statusLed.off();
     }
 }
 Task taskSetLedStatus(1000, TASK_FOREVER, &setLedStatus, &ts, true);
@@ -50,13 +63,13 @@ void gpsInitialize()
 
 void startRecording()
 {
-    params.load();   
+    params.load();
     if (webserver.arg("sessionName").length())
     {
         params.storage.gpsSessionName = HTTP::escape(webserver.arg("sessionName").c_str());
         params.save();
     }
-    
+
     gpsPort.start();
 
     switch (params.storage.gpsMode)
@@ -225,8 +238,6 @@ void handleGPSPort()
         gpsNeoGPSProxy.handleProxy(buf, len);
         break;
     }
-
-
 }
 
 void wifiSetMode(WiFiMode_t mode)
@@ -249,17 +260,17 @@ void wifiSetMode(WiFiMode_t mode)
     }
 }
 
-void buttonPressOneSec()
+void buttonPress()
 {
     g_isRecording ? stopRecording() : startRecording();
 }
 
-void buttonPressTenSec()
+void buttonPressThreeSec()
 {
     HTTPPowerOff();
 }
 
-void buttonPressFiveSec()
+void buttonPressOneSec()
 {
     switch (wifiMode.currentMode)
     {
@@ -304,9 +315,9 @@ void setup()
 
     // Button control
     button.begin();
+    button.onPressedFor(100, buttonPress);
     button.onPressedFor(1000, buttonPressOneSec);
-    button.onPressedFor(3000, buttonPressFiveSec);
-    button.onPressedFor(10000, buttonPressTenSec);
+    button.onPressedFor(3000, buttonPressThreeSec);
 
     statusLed.off();
 }

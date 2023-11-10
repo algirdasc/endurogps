@@ -4,6 +4,7 @@
 - [ ] TODO: Minimize Bootstrap CSS
 - [ ] TODO: Calculate Start/Finish line crossing
 - [ ] TODO: GPS Device PowerSave mode
+- [ ] TODO: GPS Device Baud Rate setting
 - [x] TODO: Fix "too much data" gps error
 - [x] TODO: Refactor GPS settings to Presets
 - [x] TODO: Optimize UBLOX parsing in NeoGPS

@@ -1,10 +1,10 @@
 #include <Arduino.h>
-#include <EasyButton.h>
 #include <TaskScheduler.h>
 #include <AsyncTCP.h>
 
 #include "EnduroGPS.h"
 #include "Params.h"
+#include "Button.h"
 #include "HTTP.h"
 #include "Battery.h"
 #include "WifiMode.h"

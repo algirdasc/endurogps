@@ -3,20 +3,14 @@
 void GPSPort::initialize()
 {
     GPSSerial.setRxBufferSize(GPS_RX_BUFFER_SIZE);
-    GPSSerial.begin(0, SERIAL_8N1, GPIO_GPS_RX, GPIO_GPS_TX);
-    pushMessage(UBX_CFG_PRT__SETUP, sizeof(UBX_CFG_PRT__SETUP));
-    GPSSerial.flush();
-    delay(250);
-    GPSSerial.end();
-    delay(250);
-    GPSSerial.begin(0, SERIAL_8N1, GPIO_GPS_RX, GPIO_GPS_TX);
-
+    GPSSerial.begin(115200, SERIAL_8N1, GPIO_GPS_RX, GPIO_GPS_TX);
+    
     start();
 
     // Setup
     pushMessage(UBX_CFG_GNSS__SETUP, sizeof(UBX_CFG_GNSS__SETUP));
     pushMessage(UBX_CFG_NAV5__SETUP, sizeof(UBX_CFG_NAV5__SETUP));
-
+    pushMessage(UBX_CFG_PRT__SETUP, sizeof(UBX_CFG_PRT__SETUP));
     // Optimizations
     pushMessage(UBX_CFG_PMS__SETUP, sizeof(UBX_CFG_PMS__SETUP));
     pushMessage(UBX_CFG_PMS__SAVE, sizeof(UBX_CFG_PMS__SAVE));
