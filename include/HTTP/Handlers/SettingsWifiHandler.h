@@ -66,7 +66,7 @@ public:
         int availableWifiStations = -1;
         if (server.hasArg(F("scan")))
         {
-            availableWifiStations = 0; //WiFi.scanNetworks();
+            availableWifiStations = WiFi.scanNetworks();
             if (availableWifiStations > 0)
             {
                 server.sendContent(HTML::select("Client Network Name", PARAM_WIFI_STA_SSID));

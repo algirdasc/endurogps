@@ -1,5 +1,13 @@
 #include "LED.h"
 
+#ifdef ARDUINO_TTGO_T1
+#define LED_ON HIGH
+#define LED_OFF LOW
+#else
+#define LED_ON LOW
+#define LED_OFF HIGH
+#endif
+
 LED::LED(int GPIO)
 {
     LED::GPIO = GPIO;    
@@ -9,17 +17,15 @@ LED::LED(int GPIO)
 void LED::toggle()
 {
     isOn = !isOn;
-    digitalWrite(LED::GPIO, (isOn ? HIGH : LOW));
+    digitalWrite(GPIO, (isOn ? LED_ON : LED_OFF));
 }
 
 void LED::off()
 {
-    // LedBlinkTask.disable();
-    digitalWrite(LED::GPIO, HIGH);
+    digitalWrite(GPIO, LED_OFF);
 }
 
 void LED::on()
 {
-    // LedBlinkTask.disable();
-    digitalWrite(LED::GPIO, LOW);
+    digitalWrite(GPIO, LED_ON);
 }

@@ -17,6 +17,7 @@ Battery battery;
 WebServer webserver;
 BluetoothProxy gpsBTProxy;
 NeoGPSProxy gpsNeoGPSProxy;
+Status currentStatus;
 
 static std::vector<AsyncClient *> NMEAClients;
 
@@ -29,27 +30,40 @@ Task taskReboot(0, TASK_ONCE, &esp_restart, &ts, false);
 
 void setLedStatus()
 {
+    enum Status newStatus;
+
     if (g_isRecording && !g_isLocationValid)
     {
-        if (!taskStatusLedBlink.isEnabled())
-        {
-            taskStatusLedBlink.enable();
-        }
-        taskStatusLedBlink.setInterval(200);
+        newStatus = SIGNAL_LOST;
     }
     else if (g_isRecording && g_isLocationValid)
     {
-        if (!taskStatusLedBlink.isEnabled())
-        {
-            taskStatusLedBlink.enable();
-        }
-
-        taskStatusLedBlink.setInterval(2000);
+        newStatus = RECORDING;
     }
     else
     {
-        taskStatusLedBlink.disable();
-        statusLed.off();
+        newStatus = IDLE;
+    }
+
+    if (currentStatus != newStatus)
+    {
+        switch (newStatus)
+        {
+        case SIGNAL_LOST:
+            taskStatusLedBlink.enable();
+            taskStatusLedBlink.setInterval(200);
+            break;
+        case RECORDING:
+            taskStatusLedBlink.enable();
+            taskStatusLedBlink.setInterval(2000);
+            break;
+        default:
+            taskStatusLedBlink.disable();
+            statusLed.off();
+            break;
+        }
+
+        currentStatus = newStatus;
     }
 }
 Task taskSetLedStatus(1000, TASK_FOREVER, &setLedStatus, &ts, true);
@@ -79,6 +93,7 @@ void startRecording()
         break;
     case GPS_MODE_SDCARD:
         gpsNeoGPSProxy.formatter(params.storage.logFormat, params.storage.gpsSessionName.c_str());
+        gpsNeoGPSProxy.startFinishLineCoordinates(params.storage.l1Lat.toInt(), params.storage.l1Lon.toInt(), params.storage.l2Lat.toInt(), params.storage.l2Lon.toInt());
         gpsNeoGPSProxy.start();
         break;
     }

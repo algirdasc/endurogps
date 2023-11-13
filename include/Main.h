@@ -20,3 +20,9 @@
 #include "HTTP/Handlers/SettingsTrackHandler.h"
 #include "HTTP/Handlers/FileBrowserHandler.h"
 #include "HTTP/Handlers/AssetHandler.h"
+
+enum Status {
+    IDLE,
+    RECORDING,
+    SIGNAL_LOST,        
+};

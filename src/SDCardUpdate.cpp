@@ -2,6 +2,7 @@
 
 void SDCard::start()
 {
+    SPI.begin(SCK, MISO, MOSI, SS);
     if (SD.begin())
     {
         fwUpdateCheck();

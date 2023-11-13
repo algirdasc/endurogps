@@ -65,14 +65,14 @@ void NeoGPSProxy::handleProxy(uint8_t *data, size_t size)
 }
 
 void NeoGPSProxy::handleFormatter(gps_fix gpsFix)
-{      
+{
     if (!isProxyFileCreated && (!gpsFix.valid.date || !gpsFix.valid.time))
     {
         log_e("Waiting for valid GPS date/time to create file");
 
         return;
     }
-    
+
     if (!isProxyFileCreated)
     {
         logFile = logFormatter->create(gpsFix);
@@ -85,10 +85,28 @@ void NeoGPSProxy::handleFormatter(gps_fix gpsFix)
         return;
     }
 
+    if (Coordinates::intersects(startFinishLine, fromGpsFix(lastGpsFix, gpsFix)))
+    {
+        logFormatter->newLap();
+    }
+
     if (isProxyFileCreated && !logFormatter->write(logFile, gpsFix))
     {
         stop();
     }
 
     logFile.flush();
+    lastGpsFix = gpsFix;
+}
+
+Line NeoGPSProxy::fromGpsFix(gps_fix g1, gps_fix g2)
+{
+    Line line = {.p1 = {.lat = g1.latitudeL(), .lon = g1.longitudeL()}, .p2 = {.lat = g2.latitudeL(), .lon = g2.longitudeL()}};
+
+    return line;
+}
+
+void NeoGPSProxy::startFinishLineCoordinates(int32_t lat1, int32_t lon1, int32_t lat2, int32_t lon2)
+{
+    startFinishLine = {.p1 = {.lat = lat1, .lon = lon1}, .p2 = {.lat = lat2, .lon = lon2}};
 }

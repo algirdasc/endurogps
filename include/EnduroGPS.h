@@ -11,11 +11,19 @@
 #define VERSION             FIRMWARE " [" BUILD_ENV_NAME "]"
 
 // HW
-#define GPIO_BATTERY        GPIO_NUM_35
-#define GPIO_BUTTON         GPIO_NUM_12
+#ifdef ARDUINO_TTGO_T1
+
+#define GPIO_GPS_RX         GPIO_NUM_17
+#define GPIO_GPS_TX         GPIO_NUM_16
+#else
 #define GPIO_GPS_RX         GPIO_NUM_13
 #define GPIO_GPS_TX         GPIO_NUM_15
-#define GPIO_LED            GPIO_NUM_5
+#endif
+
+#define GPIO_LED            LED_BUILTIN
+#define GPIO_BATTERY        GPIO_NUM_35
+#define GPIO_BUTTON         GPIO_NUM_12
+
 
 // Serial
 #define LOG_BAUD_RATE       115200

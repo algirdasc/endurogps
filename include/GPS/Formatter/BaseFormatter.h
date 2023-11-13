@@ -19,6 +19,8 @@ protected:
     float duration() { return (millis() - startedAt) / 1000.0; }
 
 public:
+    const char *gpsSessionName;
+
     File create(gps_fix &gpsFix)
     {
         char filePath[128];
@@ -30,10 +32,9 @@ public:
         writeHeader(file, gpsFix);
 
         return file;
-    }
-
-    const char *gpsSessionName;
-
+    }    
+    
+    virtual void newLap() { lapNo++; }
     virtual size_t write(File &file, gps_fix &gpsFix);
     virtual void close(File &file) { file.close(); }
 };
